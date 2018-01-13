@@ -80,14 +80,16 @@ void print_expr(struct Expr* expr) {
         printf(" ");
     }
 
+    struct Expr* children = expr->children;
+
     for (int i = 0; i < expr->nchildren; ++i) {
-        print_expr(expr->children);
+        print_expr(children);
 
         if (i + 1 != expr->nchildren) {
             printf(" ");
         }
 
-        ++expr->children;
+        ++children;
     }
 
     if (has_children) {
