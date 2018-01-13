@@ -57,13 +57,16 @@ void print_atom(struct Atom* atom) {
     printf("%s", str);
 }
 
-
 struct Expr {
     struct Atom* node;
     struct Expr* children;
     int nchildren;
 };
 
+/* Prints an Expr like this
+ *  (+ (+ 2 3) (+ 4 5))
+ * without a newline.
+ */
 void print_expr(struct Expr* expr) {
     int has_children = expr->nchildren > 0;
 
