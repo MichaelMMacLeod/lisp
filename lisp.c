@@ -51,6 +51,13 @@ void atom_string(struct Atom* atom, char* str) {
     }
 }
 
+void print_atom(struct Atom* atom) {
+    char str[MAX_SYMBOL_SIZE];
+    atom_string(atom, str);
+    printf("%s", str);
+}
+
+
 struct Expr {
     struct Atom* node;
     struct Expr* children;
@@ -64,9 +71,8 @@ void print_expr(struct Expr* expr) {
         printf("(");
     }
 
-    char str[MAX_SYMBOL_SIZE];
-    atom_string(expr->node, str);
-    printf("%s", str);
+    print_atom(expr->node);
+
     if (has_children) {
         printf(" ");
     }
