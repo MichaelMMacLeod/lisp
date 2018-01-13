@@ -63,7 +63,7 @@ void atom_string(struct Atom* atom, char* str) {
  */
 void print_list(struct List* list) {
     if (list == NULL) {
-        printf("()");
+        printf("()\n");
 
         return;
     }
