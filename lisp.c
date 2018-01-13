@@ -97,6 +97,46 @@ void print_expr(struct Expr* expr) {
     }
 }
 
+/* Evaluates an expression. The evaluation is done in-place, meaning that
+ * the result will be stored in the same memory location that is passed
+ * to this function.
+ */
+void eval_expr(struct Expr* expr) {
+    struct Expr* eval_pointer = expr->children;
+
+    for (int i = 0; i < expr->nchildren; ++i) {
+        eval_expr(eval_pointer);
+
+        ++eval_pointer;
+    }
+
+    eval_pointer = expr;
+
+    switch (eval_pointer->node->type) {
+        case SYMBOL:
+            if (eval_pointer->node->symbol == "+") {
+                int result = integer_add(
+                        eval_pointer->children->node,
+                        (eval_pointer->children + 1)->node);
+                
+                eval_pointer->nchildren = 0;
+                eval_pointer->node->type = INTEGER;
+                eval_pointer->node->integer = result;
+            } else {
+                printf("eval_expr: unknown symbol");
+                exit(1);
+            }
+            break;
+        case INTEGER:
+            break;
+        case BOOLEAN:
+            break;
+        default:
+            printf("eval_expr: default branch reached\n");
+            exit(1);
+    }
+}
+
 int main() {
     struct Atom a, b, c, d, e, f, g;
 
@@ -143,6 +183,7 @@ int main() {
     ax.children = ax_children;
     ax.nchildren = 2;
 
+    eval_expr(&ax);
     print_expr(&ax);
     printf("\n");
 
