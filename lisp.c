@@ -14,6 +14,21 @@ struct Atom {
     };
 };
 
+/* Returns the result of adding two integer Atoms */
+int integer_add(struct Atom* atom1, struct Atom* atom2) {
+    if (atom1->type != INTEGER) {
+        printf("integer_add: first Atom is not an integer\n");
+        exit(1);
+    }
+
+    if (atom2->type != INTEGER) {
+        printf("integer_add: second Atom is not an integer\n");
+        exit(1);
+    }
+
+    return atom1->integer + atom2->integer;
+}
+
 /* Singly-linked list of Atoms. */
 struct List {
     struct Atom* data;
