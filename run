@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cc lisp.c -o lisp.o
+
+if [[ -e lisp.o ]]; then
+    ./lisp.o
+fi
