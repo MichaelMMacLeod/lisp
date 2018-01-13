@@ -29,13 +29,6 @@ int integer_add(struct Atom* atom1, struct Atom* atom2) {
     return atom1->integer + atom2->integer;
 }
 
-/* Singly-linked list of Atoms. */
-struct List {
-    struct Atom* data;
-    struct List* next;
-};
-
-
 /* Converts an Atom's value to a char* */
 void atom_string(struct Atom* atom, char* str) {
     switch (atom->type) {
@@ -58,60 +51,89 @@ void atom_string(struct Atom* atom, char* str) {
     }
 }
 
-/* Prints out a List in this form:
- *  (item1 item2 item3)
- */
-void print_list(struct List* list) {
-    if (list == NULL) {
-        printf("()\n");
+struct Expr {
+    struct Atom* node;
+    struct Expr* children;
+    int nchildren;
+};
 
-        return;
+void print_expr(struct Expr* expr) {
+    int has_children = expr->nchildren > 0;
+
+    if (has_children) {
+        printf("(");
     }
 
-    printf("(");
+    char str[MAX_SYMBOL_SIZE];
+    atom_string(expr->node, str);
+    printf("%s", str);
+    if (has_children) {
+        printf(" ");
+    }
 
-    loop {
-        char str[MAX_SYMBOL_SIZE];
-        atom_string(list->data, str);
-        printf("%s", str);
-        
-        if (list->next == NULL) {
-            break;
-        } else {
+    for (int i = 0; i < expr->nchildren; ++i) {
+        print_expr(expr->children);
+
+        if (i + 1 != expr->nchildren) {
             printf(" ");
-            list = list->next;
         }
+
+        ++expr->children;
     }
 
-    printf(")\n");
+    if (has_children) {
+        printf(")");
+    }
 }
 
 int main() {
-    struct Atom a;
-    a.type = BOOLEAN;
-    a.boolean = 1;
+    struct Atom a, b, c, d, e, f, g;
 
-    struct List node_a;
-    node_a.data = &a;
-    node_a.next = NULL;
+    a.type = SYMBOL;
+    b.type = SYMBOL;
+    c.type = INTEGER;
+    d.type = INTEGER;
+    e.type = SYMBOL;
+    f.type = INTEGER;
+    g.type = INTEGER;
 
-    struct Atom b;
-    b.type = INTEGER;
-    b.integer = 9;
+    a.symbol = "+";
+    b.symbol = "+";
+    c.integer = 2;
+    d.integer = 3;
+    e.symbol = "+";
+    f.integer = 4;
+    g.integer = 5;
 
-    struct List node_b;
-    node_b.data = &b;
-    node_b.next = &node_a;
+    struct Expr ax, bx, cx, dx, ex, fx, gx;
 
-    struct Atom c;
-    c.type = SYMBOL;
-    c.symbol = "Green";
+    ax.node = &a;
+    bx.node = &b;
+    cx.node = &c;
+    dx.node = &d;
+    ex.node = &e;
+    fx.node = &f;
+    gx.node = &g;
 
-    struct List node_c;
-    node_c.data = &c;
-    node_c.next = &node_b;
+    cx.nchildren = 0;
+    dx.nchildren = 0;
+    fx.nchildren = 0;
+    gx.nchildren = 0;
 
-    print_list(&node_c);
+    struct Expr bx_children[] = { cx, dx };
+    bx.children = bx_children;
+    bx.nchildren = 2;
+
+    struct Expr ex_children[] = { fx, gx };
+    ex.children = ex_children;
+    ex.nchildren = 2;
+
+    struct Expr ax_children[] = { bx, ex };
+    ax.children = ax_children;
+    ax.nchildren = 2;
+
+    print_expr(&ax);
+    printf("\n");
 
     return 0;
 }
