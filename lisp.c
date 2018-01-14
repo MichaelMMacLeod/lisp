@@ -138,46 +138,6 @@ void eval_expr(struct Expr* expr) {
     }
 }
 
-int atom_type(char* str) {
-    if (*str >= '0' && *str <= '9') {
-        return INTEGER;
-    }
-
-    if (strcmp(str, "true") == 0 || strcmp(str, "false") == 0) {
-        return BOOLEAN;
-    }
-
-    return SYMBOL;
-}
-
-void parse_atom(char* str, struct Atom* result) {
-    switch (atom_type(str)) {
-        case INTEGER:
-            result->type = INTEGER;
-            result->integer = strtol(str, NULL, 10);
-            break;
-        case BOOLEAN:
-            result->type = BOOLEAN;
-            if (strcmp(str, "true") == 0) {
-                result->boolean = 1;
-            } else if (strcmp(str, "false") == 0) {
-                result->boolean = 0;
-            } else {
-                printf("parse_atom: str is not actually boolean");
-                exit(1);
-            }
-            break;
-        case SYMBOL:
-            result->type = SYMBOL;
-            result->symbol = str;
-            break;
-        default:
-            printf("parse_atom: default branch reached\n");
-            exit(1);
-            break;
-    }
-}
-
 struct Expr* parse_expr(char* str) {
     char* p = str;
 
