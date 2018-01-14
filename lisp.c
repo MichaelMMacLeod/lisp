@@ -118,7 +118,7 @@ void eval_expr(struct Expr* expr) {
                 int result = integer_add(
                         eval_pointer->children->node,
                         (eval_pointer->children + 1)->node);
-                
+
                 eval_pointer->nchildren = 0;
                 eval_pointer->node->type = INTEGER;
                 eval_pointer->node->integer = result;
