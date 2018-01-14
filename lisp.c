@@ -115,7 +115,7 @@ void eval_expr(struct Expr* expr) {
 
     switch (eval_pointer->node->type) {
         case SYMBOL:
-            if (eval_pointer->node->symbol == "+") {
+            if (strcmp(eval_pointer->node->symbol, "+") == 0) {
                 int result = integer_add(
                         eval_pointer->children->node,
                         (eval_pointer->children + 1)->node);
@@ -124,7 +124,7 @@ void eval_expr(struct Expr* expr) {
                 eval_pointer->node->type = INTEGER;
                 eval_pointer->node->integer = result;
             } else {
-                printf("eval_expr: unknown symbol");
+                printf("eval_expr: unknown symbol `%s`\n", eval_pointer->node->symbol);
                 exit(1);
             }
             break;
@@ -178,6 +178,129 @@ void parse_atom(char* str, struct Atom* result) {
     }
 }
 
+struct Expr* parse_expr(char* str) {
+    char* p = str;
+
+    struct Atom* atom = malloc(sizeof(struct Atom));
+    if (atom == NULL) {
+        printf("parse_expr(atom): NULL from malloc\n");
+        exit(1);
+    }
+
+    struct Expr* expr = malloc(sizeof(struct Expr));
+    if (expr == NULL) {
+        printf("parse_expr(expr): NULL from malloc\n");
+        exit(1);
+    }
+
+    expr->node = atom;
+    expr->children = NULL;
+    expr->nchildren = 0;
+
+    if (*p == '(') {
+        ++p;
+
+        char* start = p;
+        while (*p != ' ' && *p != ')') {
+            ++p;
+        }
+        char* end = p;
+
+        int length = end - start;
+
+        // (length + 1) for '\0'
+        char* atom_str = malloc(sizeof(char) * (length + 1));
+        if (atom_str == NULL) {
+            printf("parse_expr(atom_str): NULL from malloc");
+            exit(1);
+        }
+
+        strncpy(atom_str, start, length);
+        atom_str[length] = '\0';
+
+        atom->type = SYMBOL;
+        atom->symbol = atom_str;
+        
+        //   p
+        //   |
+        // (+ 2 (+ 3 4))
+
+        loop {
+            if (*p == ' ') {
+                ++p;
+            } else if (*p == ')') {
+                break;
+            } else if (*p == '\0') {
+                break;
+            } else if (*p == '(') {
+                ++expr->nchildren;
+
+                expr->children = realloc(
+                        expr->children,
+                        sizeof(struct Expr) * expr->nchildren);
+
+                expr->children[expr->nchildren - 1] = *parse_expr(p);
+
+                int brackets = 0;
+
+                loop {
+                    if (*p == '(') {
+                        ++brackets;
+                    } else if (*p == ')') {
+                        --brackets;
+                    }
+
+                    ++p;
+
+                    if (brackets == 0) {
+                        break;
+                    }
+                }
+            }  else {
+                ++expr->nchildren;
+
+                expr->children = realloc(
+                        expr->children,
+                        sizeof(struct Expr) * expr->nchildren);
+
+                expr->children[expr->nchildren - 1] = *parse_expr(p);
+
+                while (*p != ' ' && *p != ')') {
+                    ++p;
+                }
+
+            }
+        }
+    } else if (*p >= '0' && *p <= '9') { 
+        // TODO: better checking (above)
+        // 123hello will pass as a number, when it should be a symbol.
+        
+        int atom_integer = strtol(p, NULL, 10);
+
+        atom->type = INTEGER;
+        atom->integer = atom_integer;
+    } 
+    // TODO: handle boolean values. We need to either find a function
+    // that can compare the start of the string to "true", or do some
+    // heavy-duty string copying.
+    //
+    // Right now we are comparing something like
+    //      strcmp("true) 3 4 5", "true");
+    // which doesn't return 0.
+    /*else if (strcmp(p, "true") == 0) {
+        atom->type = BOOLEAN;
+        atom->boolean = 1;
+    } else if (strcmp(p, "false") == 0) {
+        atom->type = BOOLEAN;
+        atom->boolean = 0;
+    } */else {
+        printf("parse_expr: reached end of if\n");
+        exit(1);
+    }
+
+    return expr;
+}
+
 int main() {
     printf("press <enter> to evaluate an expression, <ctrl+c> to exit\n");
 
@@ -194,61 +317,16 @@ int main() {
 
         buffer[chars - 1] = '\0'; // remove newline from end of buffer
 
-        printf("%d\n", atom_type(buffer));
+        struct Expr* parsed = parse_expr(buffer);
+        print_expr(parsed);
+        printf(" => ");
+
+        eval_expr(parsed);
+        print_expr(parsed);
+        printf("\n");
 
         free(buffer);
     }
 
     return 0;
 }
-/*
-   struct Atom a, b, c, d, e, f, g;
-
-   a.type = SYMBOL;
-   b.type = SYMBOL;
-   c.type = INTEGER;
-   d.type = INTEGER;
-   e.type = SYMBOL;
-   f.type = INTEGER;
-   g.type = INTEGER;
-
-   a.symbol = "+";
-   b.symbol = "+";
-   c.integer = 2;
-   d.integer = 3;
-   e.symbol = "+";
-   f.integer = 4;
-   g.integer = 5;
-
-   struct Expr ax, bx, cx, dx, ex, fx, gx;
-
-   ax.node = &a;
-   bx.node = &b;
-   cx.node = &c;
-   dx.node = &d;
-   ex.node = &e;
-   fx.node = &f;
-   gx.node = &g;
-
-   cx.nchildren = 0;
-   dx.nchildren = 0;
-   fx.nchildren = 0;
-   gx.nchildren = 0;
-
-   struct Expr bx_children[] = { cx, dx };
-   bx.children = bx_children;
-   bx.nchildren = 2;
-
-   struct Expr ex_children[] = { fx, gx };
-   ex.children = ex_children;
-   ex.nchildren = 2;
-
-   struct Expr ax_children[] = { bx, ex };
-   ax.children = ax_children;
-   ax.nchildren = 2;
-
-   eval_expr(&ax);
-   print_expr(&ax);
-   printf("\n");
-   */
-
