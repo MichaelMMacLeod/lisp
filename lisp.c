@@ -30,6 +30,36 @@ int integer_add(struct Atom* atom1, struct Atom* atom2) {
     return atom1->integer + atom2->integer;
 }
 
+/* Returns the result of multiplying two integer Atoms */
+int integer_multiply(struct Atom* atom1, struct Atom* atom2) {
+    if (atom1->type != INTEGER) {
+        printf("integer_add: first Atom is not an integer\n");
+        exit(1);
+    }
+
+    if (atom2->type != INTEGER) {
+        printf("integer_add: second Atom is not an integer\n");
+        exit(1);
+    }
+
+    return atom1->integer * atom2->integer;
+}
+
+/* Returns the result of subtracting two integer Atoms */
+int integer_subtract(struct Atom* atom1, struct Atom* atom2) {
+    if (atom1->type != INTEGER) {
+        printf("integer_add: first Atom is not an integer\n");
+        exit(1);
+    }
+
+    if (atom2->type != INTEGER) {
+        printf("integer_add: second Atom is not an integer\n");
+        exit(1);
+    }
+
+    return atom1->integer - atom2->integer;
+}
+
 /* Converts an Atom's value to a char* */
 void atom_string(struct Atom* atom, char* str) {
     switch (atom->type) {
@@ -117,6 +147,22 @@ void eval_expr(struct Expr* expr) {
         case SYMBOL:
             if (strcmp(eval_pointer->node->symbol, "+") == 0) {
                 int result = integer_add(
+                        eval_pointer->children->node,
+                        (eval_pointer->children + 1)->node);
+
+                eval_pointer->nchildren = 0;
+                eval_pointer->node->type = INTEGER;
+                eval_pointer->node->integer = result;
+            } else if (strcmp(eval_pointer->node->symbol, "*") == 0) {
+                int result = integer_multiply(
+                        eval_pointer->children->node,
+                        (eval_pointer->children + 1)->node);
+
+                eval_pointer->nchildren = 0;
+                eval_pointer->node->type = INTEGER;
+                eval_pointer->node->integer = result;
+            } else if (strcmp(eval_pointer->node->symbol, "-") == 0) {
+                int result = integer_subtract(
                         eval_pointer->children->node,
                         (eval_pointer->children + 1)->node);
 
