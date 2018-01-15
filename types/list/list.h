@@ -3,7 +3,7 @@
  * Defines the List type.
  *
  * includes
- *      "node.h"
+ *      "../node/node.h"
  *
  * typedefs
  *      List
@@ -12,7 +12,7 @@
 #ifndef INCLUDE_LIST_H
 #define INCLUDE_LIST_H
 
-#include "node.h"
+#include "../node/node.h"
 
 /* A singly-linked list of Nodes.
  *
