@@ -5,6 +5,8 @@
  * typedefs
  *      Symbol
  *      Integer
+ *
+ * structs
  *      Node
  */
 
@@ -31,11 +33,11 @@ typedef int Integer;
  * ex:
  *      int data = 9;
  *
- *      Node n;
+ *      struct Node n;
  *      n.type = INTEGER;
  *      n.integer = &data;
  */
-typedef struct {
+struct Node {
     enum {
         SYMBOL,
         INTEGER
@@ -45,6 +47,6 @@ typedef struct {
         Symbol* symbol;
         Integer* integer;
     };
-} Node;
+};
 
 #endif

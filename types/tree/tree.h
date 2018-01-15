@@ -5,7 +5,7 @@
  * includes
  *      "../node/node.h"
  *
- * typedefs
+ * structs
  *      Tree
  */
 
@@ -17,13 +17,13 @@
 /* A Tree of Nodes.
  *
  * ex:
- *      Tree t;
+ *      struct Tree t;
  *      t.node = &node;
  *      t.branches[0] = &child0;
  */
-typedef struct {
-    Node* node;
-    Tree* branches;
-} Tree;
+struct Tree {
+    struct Node* node;
+    struct Tree* branches;
+};
 
 #endif

@@ -9,11 +9,11 @@
  *      "node.h"
  *
  * functions
- *      void  node_init       (Node* dest, int type, void* data)
- *      int   node_str_nchars (Node* n)
- *      char* node_malloc_str (Node* n)
- *      void  node_str        (char* dest, Node* src)
- *      void  node_print      (Node* n)
+ *      void  node_init       (struct Node* dest, int type, void* data)
+ *      int   node_str_nchars (struct Node* n)
+ *      char* node_malloc_str (struct Node* n)
+ *      void  node_str        (char* dest, struct Node* src)
+ *      void  node_print      (struct Node* n)
  * 
  * TODO: Ensure that these functions handle strings which contain abnormally
  *       large characters.
@@ -33,7 +33,7 @@
  *      node_init(&n, INTEGER, &i) => Node { type = INTEGER, integer = &i }
  *      node_init(&n, SYMBOL, &s)  => Node { type = SYMBOL, symbol = &s }
  */
-void node_init(Node* dest, int type, void* data) {
+void node_init(struct Node* dest, int type, void* data) {
     dest->type = type;
 
     switch (type) {
@@ -68,7 +68,7 @@ void node_init(Node* dest, int type, void* data) {
  *      Node { integer = 0 }      => 2
  *      Node { integer = -0 }     => 2
  */
-int node_str_nchars(Node* n) {
+int node_str_nchars(struct Node* n) {
     int nchars = 0;
 
     switch (n->type) {
@@ -114,7 +114,7 @@ int node_str_nchars(Node* n) {
  *
  * Retuns NULL if malloc returns NULL.
  */
-char* node_malloc_str(Node* n) {
+char* node_malloc_str(struct Node* n) {
     return malloc(sizeof(char) * node_str_nchars(n));
 }
 
@@ -126,7 +126,7 @@ char* node_malloc_str(Node* n) {
  *      node_str(dest, Node { symbol = "hi" })  => dest = "hi"
  *      node_str(dest, Node { integer = -123 }) => dest = "-123"
  */
-void node_str(char* dest, Node* src) {
+void node_str(char* dest, struct Node* src) {
     char* d = dest;
 
     switch (src->type) {
@@ -187,7 +187,7 @@ void node_str(char* dest, Node* src) {
  *      Node { symbol = "Hello world!" } => Hello world!
  *      Node { integer = -123 }          => -123
  */
-void node_print(Node* n) {
+void node_print(struct Node* n) {
     char* dest = node_malloc_str(n);
     node_str(dest, n);
 
