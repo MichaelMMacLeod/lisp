@@ -15,7 +15,7 @@
  *      size_t node_data_size        (struct Node* src)
  *      void*  node_malloc_data_copy (struct Node* src) {
  *      void   node_str              (char* dest, struct Node* src)
- *      void   node_copy             (struct Node* dest, struct Node* src)
+ *      void   node_data_copy        (struct Node* dest, struct Node* src)
  *      void   node_print            (struct Node* n)
  * 
  * TODO: Ensure that these functions handle strings which contain abnormally
@@ -226,7 +226,7 @@ void node_str(char* dest, struct Node* src) {
 /* Copies the data in `src` to `dest`. Assumes that the pointer to data in
  * `dest` points to a sufficiently large amount of memory.
  */
-void node_copy(struct Node* dest, struct Node* src) {
+void node_data_copy(struct Node* dest, struct Node* src) {
     switch (src->type) {
         case SYMBOL:
             {
@@ -255,7 +255,7 @@ void node_copy(struct Node* dest, struct Node* src) {
 
             break;
         default:
-            printf("node_copy: Unknown Node type `%d`", src->type);
+            printf("node_data_copy: Unknown Node type `%d`", src->type);
             exit(1);
     }
 }
