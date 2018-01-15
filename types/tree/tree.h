@@ -18,11 +18,11 @@
  *
  * ex:
  *      Tree t;
- *      t.node = node;
+ *      t.node = &node;
  *      t.branches[0] = &child0;
  */
 typedef struct {
-    Node node;
+    Node* node;
     Node* branches;
 } Tree;
 
