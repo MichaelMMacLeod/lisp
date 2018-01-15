@@ -119,6 +119,38 @@ char* node_malloc_str(struct Node* n) {
     return malloc(sizeof(char) * node_str_nchars(n));
 }
 
+size_t node_data_size(struct Node* src) {
+    switch (src->type) {
+        case SYMBOL:
+            {
+                int nchars = 1; // add one for '\0'
+                char* c = *src->symbol;
+
+                while (*c != '\0') {
+                    ++nchars;
+                    ++c;
+                }
+
+                return sizeof(char) * nchars;
+            }
+
+            break;
+        case INTEGER:
+            {
+                return sizeof(int);
+            }
+
+            break;
+        default:
+            printf("node_str_nchar: Unknown node type `%d`\n", src->type);
+            exit(1);
+    }
+}
+
+void* node_malloc_data_copy(struct Node* src) {
+    return malloc(node_data_size(src));
+}
+
 /* Deposits the data from a Node into a destination string. `dest` should point to
  * the beginning of a space of memory allocated as so:
  *      char* dest = node_malloc_str(&node);
@@ -149,7 +181,7 @@ void node_str(char* dest, struct Node* src) {
 
                 if (i < 0) {
                     i = abs(i);
-                    
+
                     *d = '-';
                     ++d;
                 }
@@ -166,7 +198,7 @@ void node_str(char* dest, struct Node* src) {
                 // walk backwards through the number
                 do {
                     --d;
-                    
+
                     *d = i % 10 + '0';
 
                     i /= 10;
@@ -203,7 +235,7 @@ void node_copy(struct Node* dest, struct Node* src) {
 
                 *d = '\0';
             }
-            
+
             break;
         case INTEGER:
             {
