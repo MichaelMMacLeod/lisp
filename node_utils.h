@@ -1,26 +1,12 @@
 /* node_utils.h
  *
- * Provides the Node struct and several functions which deal with Nodes.
+ * Provides some helpful Node functions.
  *
  * includes
  *      <stdlib.h>
  *      <stdio.h>
  *      <math.h>
- *
- * typedefs
- *      char* Symbol
- *      int Integer
- *
- * structs
- *      Node
- *          enum { 
- *              SYMBOL 
- *              INTEGER 
- *          } type
- *          union {
- *              Symbol* symbol
- *              Integer* integer
- *          }
+ *      "types.h"
  *
  * functions
  *      void  node_init       (Node* dest, int type, void* data)
@@ -39,42 +25,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-
-/* A '\0'-terminated string of length >= 1 that does not include whitespace 
- * characters.
- *
- * ex:
- *      Symbol s = "Hello";
- *      Symbol s = "+";
- *
- * wrong examples:
- *      Symbol s = "Hello world" // spaces aren't allowed
- *      Symbol s = ""            // length should be >= 1
- */
-typedef char* Symbol;
-
-typedef int Integer;
-
-/* A value which can either be a Symbol or an Integer.
- * 
- * ex:
- *      int data = 9;
- *
- *      Node n;
- *      n.type = INTEGER;
- *      n.integer = &data;
- */
-typedef struct {
-    enum {
-        SYMBOL,
-        INTEGER
-    } type;
-
-    union {
-        Symbol* symbol;
-        Integer* integer;
-    };
-} Node;
+#include "types.h"
 
 /* Initializes a Node with a type and data.
  *
