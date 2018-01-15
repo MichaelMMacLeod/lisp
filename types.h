@@ -6,6 +6,7 @@
  *      Symbol
  *      Integer
  *      Node
+ *      List
  */
 
 #ifndef INCLUDE_TYPES_H
@@ -46,5 +47,17 @@ typedef struct {
         Integer* integer;
     };
 } Node;
+
+/* A singly-linked list of Nodes.
+ *
+ * ex:
+ *      List l;
+ *      l.node = node;
+ *      l.next = &next;
+ */
+typedef struct {
+    Node node;
+    Node* next;
+} List;
 
 #endif
