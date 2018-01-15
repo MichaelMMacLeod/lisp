@@ -6,7 +6,7 @@
  *      <stdlib.h>
  *      <stdio.h>
  *      <math.h>
- *      "types.h"
+ *      "node.h"
  *
  * functions
  *      void  node_init       (Node* dest, int type, void* data)
@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "types.h"
+#include "node.h"
 
 /* Initializes a Node with a type and data.
  *
