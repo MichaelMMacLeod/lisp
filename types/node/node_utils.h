@@ -9,12 +9,14 @@
  *      "node.h"
  *
  * functions
- *      void  node_init       (struct Node* dest, int type, void* data)
- *      int   node_str_nchars (struct Node* n)
- *      char* node_malloc_str (struct Node* n)
- *      void  node_str        (char* dest, struct Node* src)
- *      void  node_copy       (struct Node* dest, struct Node* src)
- *      void  node_print      (struct Node* n)
+ *      void   node_init             (struct Node* dest, int type, void* data)
+ *      int    node_str_nchars       (struct Node* n)
+ *      char*  node_malloc_str       (struct Node* n)
+ *      size_t node_data_size        (struct Node* src)
+ *      void*  node_malloc_data_copy (struct Node* src) {
+ *      void   node_str              (char* dest, struct Node* src)
+ *      void   node_copy             (struct Node* dest, struct Node* src)
+ *      void   node_print            (struct Node* n)
  * 
  * TODO: Ensure that these functions handle strings which contain abnormally
  *       large characters.
@@ -119,6 +121,8 @@ char* node_malloc_str(struct Node* n) {
     return malloc(sizeof(char) * node_str_nchars(n));
 }
 
+/* Calculates the size of data stored in `src`.
+ */
 size_t node_data_size(struct Node* src) {
     switch (src->type) {
         case SYMBOL:
@@ -147,6 +151,11 @@ size_t node_data_size(struct Node* src) {
     }
 }
 
+/* A pointer to the start of a chunk of memory that is the same size as the memory
+ * used to store the data in `src`.
+ *
+ * NULL if malloc returns NULL.
+ */
 void* node_malloc_data_copy(struct Node* src) {
     return malloc(node_data_size(src));
 }
