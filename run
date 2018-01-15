@@ -1,7 +1,0 @@
-#!/bin/bash
-
-[[ -e lisp.o ]] && rm lisp.o
-
-cc lisp.c -o lisp.o
-
-[[ -e lisp.o ]] && ./lisp.o
