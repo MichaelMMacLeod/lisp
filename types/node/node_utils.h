@@ -13,6 +13,7 @@
  *      int   node_str_nchars (struct Node* n)
  *      char* node_malloc_str (struct Node* n)
  *      void  node_str        (char* dest, struct Node* src)
+ *      void  node_copy       (struct Node* dest, struct Node* src)
  *      void  node_print      (struct Node* n)
  * 
  * TODO: Ensure that these functions handle strings which contain abnormally
@@ -178,6 +179,43 @@ void node_str(char* dest, struct Node* src) {
                 printf("node_str: Unknown Node type `%d`", src->type);
                 exit(1);
             }
+    }
+}
+
+/* Copies the data in `src` to `dest`. Assumes that the pointer to data in
+ * `dest` points to a sufficiently large amount of memory.
+ */
+void node_copy(struct Node* dest, struct Node* src) {
+    switch (src->type) {
+        case SYMBOL:
+            {
+                dest->type = SYMBOL;
+
+                char* d = *dest->symbol;
+                char* s = *src->symbol;
+
+                while (*s != '\0') {
+                    *d = *s;
+
+                    ++d;
+                    ++s;
+                }
+
+                *d = '\0';
+            }
+            
+            break;
+        case INTEGER:
+            {
+                dest->type = INTEGER;
+
+                *dest->integer = *src->integer;
+            }
+
+            break;
+        default:
+            printf("node_copy: Unknown Node type `%d`", src->type);
+            exit(1);
     }
 }
 
