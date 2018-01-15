@@ -1,16 +1,15 @@
-/* types.h
+/* node.h
  *
- * Defines several types.
+ * Defines the Node type.
  *
  * typedefs
  *      Symbol
  *      Integer
  *      Node
- *      List
  */
 
-#ifndef INCLUDE_TYPES_H
-#define INCLUDE_TYPES_H
+#ifndef INCLUDE_NODE_H
+#define INCLUDE_NODE_H
 
 /* A '\0'-terminated string of length >= 1 that does not include whitespace 
  * characters.
@@ -47,17 +46,5 @@ typedef struct {
         Integer* integer;
     };
 } Node;
-
-/* A singly-linked list of Nodes.
- *
- * ex:
- *      List l;
- *      l.node = node;
- *      l.next = &next;
- */
-typedef struct {
-    Node node;
-    Node* next;
-} List;
 
 #endif
