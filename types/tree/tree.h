@@ -23,7 +23,7 @@
  */
 typedef struct {
     Node* node;
-    Node* branches;
+    Tree* branches;
 } Tree;
 
 #endif
