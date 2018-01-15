@@ -1,3 +1,38 @@
+/* node_utils.h
+ *
+ * Provides the Node struct and several functions which deal with Nodes.
+ *
+ * includes
+ *      <stdlib.h>
+ *      <stdio.h>
+ *      <math.h>
+ *
+ * typedefs
+ *      char* Symbol
+ *      int Integer
+ *
+ * structs
+ *      Node
+ *          enum { 
+ *              SYMBOL 
+ *              INTEGER 
+ *          } type
+ *          union {
+ *              Symbol* symbol
+ *              Integer* integer
+ *          }
+ *
+ * functions
+ *      void  node_init       (Node* dest, int type, void* data)
+ *      int   node_str_nchars (Node* n)
+ *      char* node_malloc_str (Node* n)
+ *      void  node_str        (char* dest, Node* src)
+ *      void  node_print      (Node* n)
+ * 
+ * TODO: Ensure that these functions handle strings which contain abnormally
+ *       large characters.
+ */
+
 #ifndef INCLUDE_NODE_UTILS_H
 #define INCLUDE_NODE_UTILS_H
 
@@ -5,9 +40,30 @@
 #include <stdio.h>
 #include <math.h>
 
+/* A '\0'-terminated string of length >= 1 that does not include whitespace 
+ * characters.
+ *
+ * ex:
+ *      Symbol s = "Hello";
+ *      Symbol s = "+";
+ *
+ * wrong examples:
+ *      Symbol s = "Hello world" // spaces aren't allowed
+ *      Symbol s = ""            // length should be >= 1
+ */
 typedef char* Symbol;
+
 typedef int Integer;
 
+/* A value which can either be a Symbol or an Integer.
+ * 
+ * ex:
+ *      int data = 9;
+ *
+ *      Node n;
+ *      n.type = INTEGER;
+ *      n.integer = &data;
+ */
 typedef struct {
     enum {
         SYMBOL,
@@ -50,12 +106,12 @@ void node_init(Node* dest, int type, void* data) {
     }
 }
 
-/* Calculates the number of characters required to store the value inside a Node
- * including the '\0' character.
+/* Calculates the number of characters required to copy the value inside a Node
+ * to a string (including the '\0' character).
+ *
  *
  * ex:
  *      Node { symbol = "12345" } => 6
- *      Node { symbol = "" }      => 1
  *      Node { integer = 10 }     => 3
  *      Node { integer = -1 }     => 3
  *      Node { integer = 0 }      => 2
@@ -102,8 +158,10 @@ int node_str_nchars(Node* n) {
     return nchars;
 }
 
-/* Allocates the proper ammount of memory for storing the data inside a Node in a 
- * string.
+/* Allocates the proper ammount of memory required to copy the data inside a Node
+ * and convert it into a string.
+ *
+ * Retuns NULL if malloc returns NULL.
  */
 char* node_malloc_str(Node* n) {
     return malloc(sizeof(char) * node_str_nchars(n));
