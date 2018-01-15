@@ -9,7 +9,7 @@
  *      "node.h"
  *
  * functions
- *      void   node_init             (struct Node* dest, int type, void* data)
+ *      void   node_new              (struct Node* dest, int type, void* data)
  *      int    node_str_nchars       (struct Node* n)
  *      char*  node_malloc_str       (struct Node* n)
  *      size_t node_data_size        (struct Node* src)
@@ -33,10 +33,10 @@
 /* Initializes a Node with a type and data.
  *
  * ex:
- *      node_init(&n, INTEGER, &i) => Node { type = INTEGER, integer = &i }
- *      node_init(&n, SYMBOL, &s)  => Node { type = SYMBOL, symbol = &s }
+ *      node_new(&n, INTEGER, &i) => Node { type = INTEGER, integer = &i }
+ *      node_new(&n, SYMBOL, &s)  => Node { type = SYMBOL, symbol = &s }
  */
-void node_init(struct Node* dest, int type, void* data) {
+void node_new(struct Node* dest, int type, void* data) {
     dest->type = type;
 
     switch (type) {
@@ -54,7 +54,7 @@ void node_init(struct Node* dest, int type, void* data) {
             break;
         default:
             {
-                printf("node_init: Unknown node type `%d`\n", dest->type);
+                printf("node_new: Unknown node type `%d`\n", dest->type);
                 exit(1);
             }
     }
