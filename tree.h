@@ -16,7 +16,7 @@
 
 struct Tree {
     struct Node* node;
-    struct Tree* children;
+    struct Tree* child;
 };
 
 #endif
