@@ -113,6 +113,7 @@ int main()
     node_print(node2);
 
     node_free(node2);
+    free(i);
 
     char* str = malloc(sizeof(char) * 100);
     strcpy(str, "hola?");
@@ -121,6 +122,7 @@ int main()
     node_print(node3);
 
     node_free(node3);
+    free(str);
 
     return 0;
 }
