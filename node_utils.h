@@ -13,7 +13,7 @@
  */
 
 #ifndef INCLUDE_NODE_UTILS_H
-#define INCLudE_NODE_UTILS_H
+#define INCLUDE_NODE_UTILS_H
 
 #include <stdlib.h>
 #include <stdio.h>

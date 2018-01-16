@@ -10,7 +10,7 @@
  */
 
 #ifndef INCLUDE_TREE_H
-#define TREE_H
+#define INCLUDE_TREE_H
 
 #include "node.h"
 

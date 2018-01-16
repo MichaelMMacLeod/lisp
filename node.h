@@ -15,7 +15,7 @@
  */
 
 #ifndef INCLUDE_NODE_H
-#define INCLudE_NODE_H
+#define INCLUDE_NODE_H
 
 #include <stdlib.h>
 #include <stdio.h>
