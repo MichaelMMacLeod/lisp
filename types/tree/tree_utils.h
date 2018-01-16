@@ -6,8 +6,8 @@
  *      <stdlib.h>
  *      <stdio.h>
  *      "tree.h"
- *      "node.h"
- *      "node_utils.h"
+ *      "../node/node.h"
+ *      "../node/node_utils.h"
  *
  *  functions
  *      struct Tree* tree_create_leaf (struct Node* node)
@@ -20,8 +20,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "tree.h"
-#include "node.h"
-#include "node_utils.h"
+#include "../node/node.h"
+#include "../node/node_utils.h"
 
 /* Allocates a leaf (a Tree with NULL children).
  */
