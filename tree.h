@@ -1,3 +1,14 @@
+/* tree.h
+ *
+ * Defines the Tree datatype.
+ *
+ *  includes
+ *      "node.h"
+ *
+ *  structs
+ *      Tree
+ */
+
 #ifndef INCLUDE_TREE_H
 #define TREE_H
 
