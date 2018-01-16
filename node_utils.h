@@ -1,3 +1,17 @@
+/* node_utils.h
+ *
+ * Defines several helpful Node-related functions.
+ *
+ *  includes
+ *      <stdlib.h>
+ *      <stdio.h>
+ *      "node.h"
+ *
+ *  functions
+ *      struct Node* node_create (int type, void* val)
+ *      void         node_free   (struct Node* node)
+ */
+
 #ifndef INCLUDE_NODE_UTILS_H
 #define INCLudE_NODE_UTILS_H
 
@@ -5,6 +19,8 @@
 #include <stdio.h>
 #include "node.h"
 
+/* Allocates a node with a given type and value.
+ */
 struct Node* node_create(int type, void* val)
 {
     struct Node* node = malloc(sizeof(struct Node));
@@ -38,6 +54,8 @@ struct Node* node_create(int type, void* val)
     return node;
 }
 
+/* Deallocates a node.
+ */
 void node_free(struct Node* node)
 {
     switch (node->type) {
