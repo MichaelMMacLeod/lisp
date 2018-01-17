@@ -121,36 +121,24 @@ size_t node_tosymbol_mem_size(struct Node* node)
 
 Symbol* node_tosymbol(struct Node* node)
 {
+    size_t size = node_tosymbol_mem_size(node);
+
+    Symbol* s = malloc(size);
+    if (s == NULL) {
+        printf("node_tosymbol: out of memory\n");
+        exit(1);
+    }
+
     switch (node->type) {
         case SYMBOL:
             {
-                size_t size = node_tosymbol_mem_size(node);
-
-                Symbol* s = malloc(size);
-                if (s == NULL) {
-                    printf("node_tosymbol: out of memory\n");
-                    exit(1);
-                }
-
                 sprintf(s, "%s", node->symbol);
-
-                return s;
             }
 
             break;
         case INTEGER:
             {
-                size_t size = node_tosymbol_mem_size(node);
-
-                Symbol* s = malloc(size);
-                if (s == NULL) {
-                    printf("node_tosymbol: out of memory\n");
-                    exit(1);
-                }
-
                 sprintf(s, "%d", *node->integer);
-
-                return s;
             }
 
             break;
@@ -158,6 +146,8 @@ Symbol* node_tosymbol(struct Node* node)
             printf("node_tostring: reached default branch\n");
             exit(1);
     }
+
+    return s;
 }
 
 #endif
