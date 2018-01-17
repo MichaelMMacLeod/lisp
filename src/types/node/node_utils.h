@@ -5,6 +5,7 @@
  *  includes
  *      <stdlib.h>
  *      <stdio.h>
+ *      <string.h>
  *      "node.h"
  *
  *  functions
@@ -17,10 +18,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "node.h"
 
 /* Allocates a node with a given type and value.
- */
+*/
 struct Node* node_create(int type, void* val)
 {
     struct Node* node = malloc(sizeof(struct Node));
@@ -55,7 +57,7 @@ struct Node* node_create(int type, void* val)
 }
 
 /* Deallocates a node.
- */
+*/
 void node_free(struct Node* node)
 {
     switch (node->type) {
@@ -79,6 +81,42 @@ void node_free(struct Node* node)
     }
 
     free(node);
+}
+
+size_t node_tostring_mem_size(struct Node* node)
+{
+    switch (node->type) {
+        case SYMBOL:
+            {
+                return sizeof(char) * (strlen(node->symbol) + 1);
+            }
+
+            break;
+        case INTEGER:
+            {
+                int i = *node->integer;
+                int nchars = 1;
+                
+                if (i < 0) {
+                    i = abs(i);
+                    ++nchars;
+                }
+
+                do {
+                    ++nchars;
+                    i /= 10;
+                } while (i > 0);
+
+                return sizeof(char) * nchars;
+            }
+
+            break;
+        default:
+            {
+                printf("node_tostring_mem_size: reached default branch\n");
+                exit(1);
+            }
+    }
 }
 
 #endif
