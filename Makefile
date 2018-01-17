@@ -1,4 +1,4 @@
-FILES = src/lisp.c src/types/node/node.h src/types/node/node_utils.h src/types/tree/tree.h src/types/tree/tree_utils.h src/functions/functions.h
+FILES = src/lisp.c src/types/node/node.h src/types/node/node_utils.h src/types/tree/tree.h src/types/tree/tree_utils.h src/functions/functions.h src/functions/repl.h
 
 $(shell [ -d build/debug ] || mkdir -p build/debug)
 $(shell [ -d build/release ] || mkdir -p build/release)

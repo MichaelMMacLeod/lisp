@@ -85,4 +85,72 @@ struct Tree* read_make_leaf(char* expr)
     return leaf;
 }
 
+struct Tree* read(char* expr)
+{
+    struct Tree* tree = NULL;
+    char* p = expr;
+
+    if (*p == '(') {
+        ++p;
+
+        tree = read_make_leaf(p);
+
+        while (*p != ' ' && *p != ')' && *p != '\0') {
+            ++p;
+        }
+
+        while (*p == ' ') {
+            ++p;
+        }
+
+        if (*p == ')') {
+            tree->child = NULL;
+            return tree;
+        }
+        
+        int nchildren = 0;
+
+        while (*p != '\0') {
+            if (nchildren != 0) {
+                tree->child = realloc(
+                        tree->child,
+                        sizeof(struct Tree) * nchildren);
+
+                tree->child[nchildren] = *read(p);
+            } else {
+                tree->child = read(p);
+            }
+
+            ++nchildren;
+
+            //struct Tree* child = tree->child + nchildren;
+            //tree->child[nchildren] = *read(p);
+            //child = read(p);
+
+            int openparen = 0;
+
+            do {
+                if (*p == '(') 
+                    ++openparen;
+                else if (*p == ')')
+                    --openparen;
+
+                ++p;
+            } while (openparen != 0);
+
+            while (*p == ' ') {
+                ++p;
+            }
+
+            break;
+        }
+    } else if (*p == ')') {
+        tree = NULL; // for clarity
+    } else {
+        tree = read_make_leaf(p);
+    }
+
+    return tree;
+}
+
 #endif
