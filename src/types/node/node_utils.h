@@ -9,8 +9,10 @@
  *      "node.h"
  *
  *  functions
- *      struct Node* node_create (int type, void* val)
- *      void         node_free   (struct Node* node)
+ *      struct Node* node_create            (int type, void* val)
+ *      void         node_free              (struct Node* node)
+ *      size_t       node_tosymbol_mem_size (struct Node* node)
+ *      Symbol*      node_tosymbol          (struct Node* node)
  */
 
 #ifndef INCLUDE_NODE_UTILS_H
@@ -83,6 +85,9 @@ void node_free(struct Node* node)
     free(node);
 }
 
+/* Calculates the size of memory required to store the Symbol representation of
+ * a Node.
+ */
 size_t node_tosymbol_mem_size(struct Node* node)
 {
     switch (node->type) {
@@ -96,7 +101,7 @@ size_t node_tosymbol_mem_size(struct Node* node)
             {
                 int i = *node->integer;
                 int nchars = 1;
-                
+
                 if (i < 0) {
                     i = abs(i);
                     ++nchars;
@@ -113,12 +118,14 @@ size_t node_tosymbol_mem_size(struct Node* node)
             break;
         default:
             {
-                printf("node_tostring_mem_size: reached default branch\n");
+                printf("node_tosymbol_mem_size: reached default branch\n");
                 exit(1);
             }
     }
 }
 
+/* Returns the Symbol representation of a Node.
+*/
 Symbol* node_tosymbol(struct Node* node)
 {
     size_t size = node_tosymbol_mem_size(node);
