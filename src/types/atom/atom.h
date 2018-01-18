@@ -5,7 +5,7 @@
 #define INCLUDE_CELL_H
 
 #define MEM_CHECK(p) if (p == NULL) { printf("out of memory\n"); exit(1); }
-#define BAD_TYPE(p) printf("unknown type %d\n"); exit(1);
+#define BAD_TYPE(p) printf("unknown type %d\n", p); exit(1);
 
 struct Atom *create_atom();
 struct Atom *create_atom_symbol(char *symbol);
@@ -63,7 +63,6 @@ struct Atom *create_atom_integer(int *integer) {
     return atom;
 }
 
-struct Pair *create_pair(struct Atom *car, struct Atom *cdr);
 struct Atom *create_atom_pair(struct Atom *car, struct Atom *cdr) {
     struct Atom *atom = create_atom();
 
