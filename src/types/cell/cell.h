@@ -7,25 +7,35 @@
 #define MEM_CHECK(p) if (p == NULL) { printf("out of memory\n"); exit(1); }
 #define BAD_TYPE(p) printf("unknown type %d\n"); exit(1);
 
+struct Atom *create_atom();
+struct Atom *create_atom_symbol(char *symbol);
+struct Atom *create_atom_integer(int *integer);
+struct Atom *create_atom_pair(struct Atom *car, struct Atom *cdr);
+struct Atom *create_atom_atom(struct Atom *atom);
+
+struct Pair *create_pair(struct Atom *car, struct Atom *cdr);
+
+void print_atom_symbol(struct Atom *atom);
+void print_atom_integer(struct Atom *atom);
+void print_atom_pair(struct Atom *atom);
+void print_atom_atom(struct Atom *atom);
+void print_atom(struct Atom *atom);
+
+void print_pair(struct Pair *pair);
+
 struct Atom {
-    enum { SYMBOL, INTEGER } type;
+    enum { SYMBOL, INTEGER, PAIR, ATOM } type;
     union {
-        char* symbol;
-        int* integer;
+        char *symbol;
+        int *integer;
+        struct Pair *pair;
+        struct Atom *atom;
     };
 };
 
 struct Pair {
-    struct Cell *car;
-    struct Cell *cdr;
-};
-
-struct Cell {
-    enum { PAIR, ATOM } type;
-    union {
-        struct Pair *pair;
-        struct Atom *atom;
-    };
+    struct Atom *car;
+    struct Atom *cdr;
 };
 
 struct Atom *create_atom() {
@@ -37,7 +47,7 @@ struct Atom *create_atom() {
 
 struct Atom *create_atom_symbol(char *symbol) {
     struct Atom *atom = create_atom();
-
+    
     atom->type = SYMBOL;
     atom->symbol = symbol;
 
@@ -53,7 +63,26 @@ struct Atom *create_atom_integer(int *integer) {
     return atom;
 }
 
-struct Pair *create_pair(struct Cell *car, struct Cell *cdr) {
+struct Pair *create_pair(struct Atom *car, struct Atom *cdr);
+struct Atom *create_atom_pair(struct Atom *car, struct Atom *cdr) {
+    struct Atom *atom = create_atom();
+
+    atom->type = PAIR;
+    atom->pair = create_pair(car, cdr);
+
+    return atom;
+}
+
+struct Atom *create_atom_atom(struct Atom *atom) {
+    struct Atom *atom_atom = create_atom();
+
+    atom_atom->type = ATOM;
+    atom_atom->atom = atom;
+
+    return atom;
+}
+
+struct Pair *create_pair(struct Atom *car, struct Atom *cdr) {
     struct Pair *pair = malloc(sizeof(struct Pair));
     MEM_CHECK(pair);
 
@@ -63,37 +92,20 @@ struct Pair *create_pair(struct Cell *car, struct Cell *cdr) {
     return pair;
 }
 
-struct Cell *create_cell() {
-    struct Cell *cell = malloc(sizeof(struct Cell));
-    MEM_CHECK(cell);
-
-    return cell;
-}
-
-struct Cell *create_cell_pair(struct Pair *pair) {
-    struct Cell *cell = create_cell();
-
-    cell->type = PAIR;
-    cell->pair = pair;
-
-    return cell;
-}
-
-struct Cell *create_cell_atom(struct Atom *atom) {
-    struct Cell *cell = create_cell();
-
-    cell->type = ATOM;
-    cell->atom = atom;
-
-    return cell;
-}
-
 void print_atom_symbol(struct Atom *atom) {
-    printf("%s", atom->symbol);
+    printf("%s", atom->symbol);   
 }
 
 void print_atom_integer(struct Atom *atom) {
     printf("%d", *atom->integer);
+}
+
+void print_atom_pair(struct Atom *atom) {
+    print_pair(atom->pair);
+}
+
+void print_atom_atom(struct Atom *atom) {
+    print_atom(atom->atom);
 }
 
 void print_atom(struct Atom *atom) {
@@ -104,48 +116,30 @@ void print_atom(struct Atom *atom) {
         case INTEGER:
             print_atom_integer(atom);
             break;
-        default:
-            BAD_TYPE(atom->type);
-    }
-}
-
-void print_cell_atom(struct Cell *cell) {
-    print_atom(cell->atom);
-}
-
-void print_pair(struct Pair *pair);
-
-void print_cell_pair(struct Cell *cell) {
-    print_pair(cell->pair);
-}
-
-void print_cell(struct Cell *cell) {
-    switch (cell->type) {
         case PAIR:
-            print_cell_pair(cell);
+            print_atom_pair(atom);
             break;
         case ATOM:
-            print_cell_atom(cell);
+            print_atom_atom(atom);
             break;
         default:
-            BAD_TYPE(cell->type);
+            BAD_TYPE(atom->type);
     }
 }
 
 void print_pair(struct Pair *pair) {
     printf("(");
 
-    if (pair->car == NULL)
-        return;
+    if (pair->car != NULL) {
+        print_atom(pair->car);
 
-    print_cell(pair->car);
+        if (pair->cdr != NULL) {
+            printf(" ");
+            
+            print_atom(pair->cdr);
+        }
 
-    if (pair->cdr == NULL)
-        return;
-
-    printf(" ");
-
-    print_cell(pair->cdr);
+    }
 
     printf(")");
 }

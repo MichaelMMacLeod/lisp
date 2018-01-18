@@ -1,17 +1,22 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "cell.h"
 
 int main() {
+    char *s1 = malloc(sizeof(char) * 32);
+    strcpy(s1, "+");
+
     int *i1 = malloc(sizeof(int));
-    *i1 = 12;
+    *i1 = 1;
+    
     int *i2 = malloc(sizeof(int));
-    *i2 = 345;
-    struct Atom *a1 = create_atom_integer(i1);
-    struct Atom *a2 = create_atom_integer(i2);
-    struct Cell *c1 = create_cell_atom(a1);
-    struct Cell *c2 = create_cell_atom(a2);
-    struct Pair *p1 = create_pair(c1, c2);
+    *i2 = 2;
+
+    struct Atom *a1 = create_atom_symbol(s1);
+    struct Atom *a2 = create_atom_integer(i1);
+
+    struct Pair *p1 = create_pair(a1, a2);
 
     print_pair(p1);
 
