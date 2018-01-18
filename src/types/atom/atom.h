@@ -7,22 +7,6 @@
 #define MEM_CHECK(p) if (p == NULL) { printf("out of memory\n"); exit(1); }
 #define BAD_TYPE(p) printf("unknown type %d\n", p); exit(1);
 
-struct Atom *create_atom();
-struct Atom *create_atom_symbol(char *symbol);
-struct Atom *create_atom_integer(int *integer);
-struct Atom *create_atom_pair(struct Atom *car, struct Atom *cdr);
-struct Atom *create_atom_atom(struct Atom *atom);
-
-struct Pair *create_pair(struct Atom *car, struct Atom *cdr);
-
-void print_atom_symbol(struct Atom *atom);
-void print_atom_integer(struct Atom *atom);
-void print_atom_pair(struct Atom *atom);
-void print_atom_atom(struct Atom *atom);
-void print_atom(struct Atom *atom);
-
-void print_pair(struct Pair *pair);
-
 struct Atom {
     enum { SYMBOL, INTEGER, PAIR, ATOM } type;
     union {
@@ -35,8 +19,22 @@ struct Atom {
 
 struct Pair {
     struct Atom *car;
-    struct Atom *cdr;
+    struct Pair *cdr;
 };
+
+struct Atom *create_atom();
+struct Atom *create_atom_symbol(char *symbol);
+struct Atom *create_atom_integer(int *integer);
+struct Atom *create_atom_pair(struct Pair *pair);
+struct Atom *create_atom_atom(struct Atom *atom);
+struct Pair *create_pair(struct Atom *car, struct Pair *cdr);
+
+void print_atom_symbol(struct Atom *atom);
+void print_atom_integer(struct Atom *atom);
+void print_atom_pair(struct Atom *atom);
+void print_atom_atom(struct Atom *atom);
+void print_atom(struct Atom *atom);
+void print_pair(struct Pair *pair);
 
 struct Atom *create_atom() {
     struct Atom *atom = malloc(sizeof(struct Atom));
@@ -63,11 +61,11 @@ struct Atom *create_atom_integer(int *integer) {
     return atom;
 }
 
-struct Atom *create_atom_pair(struct Atom *car, struct Atom *cdr) {
+struct Atom *create_atom_pair(struct Pair *pair) {
     struct Atom *atom = create_atom();
 
     atom->type = PAIR;
-    atom->pair = create_pair(car, cdr);
+    atom->pair = pair;
 
     return atom;
 }
@@ -81,7 +79,7 @@ struct Atom *create_atom_atom(struct Atom *atom) {
     return atom;
 }
 
-struct Pair *create_pair(struct Atom *car, struct Atom *cdr) {
+struct Pair *create_pair(struct Atom *car, struct Pair *cdr) {
     struct Pair *pair = malloc(sizeof(struct Pair));
     MEM_CHECK(pair);
 
@@ -135,7 +133,7 @@ void print_pair(struct Pair *pair) {
         if (pair->cdr != NULL) {
             printf(" ");
             
-            print_atom(pair->cdr);
+            print_pair(pair->cdr);
         }
 
     }
