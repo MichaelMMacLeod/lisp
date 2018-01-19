@@ -36,6 +36,8 @@ void print_atom_atom(struct Atom *atom);
 void print_atom(struct Atom *atom);
 void print_pair(struct Pair *pair);
 
+struct Atom *eval_pair(struct Pair *pair);
+
 struct Atom *create_atom() {
     struct Atom *atom = malloc(sizeof(struct Atom));
     MEM_CHECK(atom);
@@ -138,6 +140,81 @@ void print_pair(struct Pair *pair) {
             printf(" ");
             print_pair(pair->cdr);
         }
+    }
+}
+
+struct Atom *fn_integer_add(struct Atom *a, struct Atom *b) {
+    int *i = malloc(sizeof(int));
+    MEM_CHECK(i);
+
+    *i = *a->integer + *b->integer;
+
+    return create_atom_integer(i);
+}
+
+struct Atom *fn_fold_integer_add(struct Pair *pair) {
+    struct Atom *a = NULL;
+
+    if (pair->car->type == PAIR) {
+        a = fn_fold_integer_add(pair->car->pair);
+    } else {
+        a = pair->car;
+    }
+
+    if (pair->cdr == NULL) {
+        return a;
+    } else {
+        return fn_integer_add(a, fn_fold_integer_add(pair->cdr));
+    }
+}
+
+struct Atom *fn_integer_subtract(struct Atom *a, struct Atom *b) {
+    int *i = malloc(sizeof(int));
+    MEM_CHECK(i);
+
+    *i = *a->integer - *b->integer;
+
+    return create_atom_integer(i);
+}
+
+struct Atom *fn_fold_integer_subtract(struct Pair *pair) {
+    struct Atom *a = NULL;
+
+    if (pair->car->type == PAIR) {
+        a = fn_fold_integer_subtract(pair->car->pair);
+    } else {
+        a = pair->car;
+    }
+
+    if (pair->cdr == NULL) {
+        return a;
+    } else {
+        return fn_integer_subtract(a, fn_fold_integer_subtract(pair->cdr));
+    }
+}
+
+struct Atom *fn_integer_multiply(struct Atom *a, struct Atom *b) {
+    int *i = malloc(sizeof(int));
+    MEM_CHECK(i);
+
+    *i = *a->integer * *b->integer;
+
+    return create_atom_integer(i);
+}
+
+struct Atom *fn_fold_integer_multiply(struct Pair *pair) {
+    struct Atom *a = NULL;
+
+    if (pair->car->type == PAIR) {
+        a = fn_fold_integer_multiply(pair->car->pair);
+    } else {
+        a = pair->car;
+    }
+
+    if (pair->cdr == NULL) {
+        return a;
+    } else {
+        return fn_integer_multiply(a, fn_fold_integer_multiply(pair->cdr));
     }
 }
 

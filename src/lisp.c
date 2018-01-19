@@ -36,7 +36,11 @@ int main() {
     struct Pair *p5 = create_pair(a5, p4);
     struct Pair *p6 = create_pair(a6, p5);
 
-    print_pair(p6);
+    struct Atom *result = fn_fold_integer_add(p2);
+    struct Pair *p_result = create_pair(result, NULL);
+
+    //print_pair(p6);
+    print_pair(p_result);
 
     return 0;
 }
