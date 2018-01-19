@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifndef INCLUDE_CELL_H
 #define INCLUDE_CELL_H
@@ -8,12 +9,17 @@
 #define BAD_TYPE(p) printf("unknown type %d\n", p); exit(1);
 
 struct Atom {
-    enum { SYMBOL, INTEGER, PAIR, ATOM } type;
+    enum { SYMBOL, INTEGER, PAIR, ATOM, FUNCTION } type;
     union {
         char *symbol;
         int *integer;
         struct Pair *pair;
         struct Atom *atom;
+        enum {
+            FN_FOLD_INTEGER_ADD,
+            FN_FOLD_INTEGER_SUBTRACT,
+            FN_FOLD_INTEGER_MULTIPLY
+        } function;
     };
 };
 
@@ -107,6 +113,26 @@ void print_atom_atom(struct Atom *atom) {
     print_atom(atom->atom);
 }
 
+void print_atom_function(struct Atom *atom) {
+    int fn = atom->function;
+
+    if (fn == FN_FOLD_INTEGER_ADD) {
+        printf("+");
+        return;
+    }
+    if (fn == FN_FOLD_INTEGER_SUBTRACT) {
+        printf("-");
+        return;
+    }
+    if (fn == FN_FOLD_INTEGER_MULTIPLY) {
+        printf("*");
+        return;
+    }
+
+    printf("print_atom_function: unknown function id %d\n", fn);
+    exit(1);
+}
+
 void print_atom(struct Atom *atom) {
     switch (atom->type) {
         case SYMBOL:
@@ -120,6 +146,9 @@ void print_atom(struct Atom *atom) {
             break;
         case ATOM:
             print_atom_atom(atom);
+            break;
+        case FUNCTION:
+            print_atom_function(atom);
             break;
         default:
             BAD_TYPE(atom->type);
@@ -217,5 +246,31 @@ struct Atom *fn_fold_integer_multiply(struct Pair *pair) {
         return fn_integer_multiply(a, fn_fold_integer_multiply(pair->cdr));
     }
 }
+
+struct Atom *create_atom_function(int function_type) {
+    struct Atom *atom = malloc(sizeof(struct Atom));
+    MEM_CHECK(atom);
+
+    atom->type = FUNCTION;
+    atom->function = function_type;
+
+    return atom;
+}
+
+struct Atom *parse_atom_function(struct Atom *atom) {
+    char *symbol = atom->symbol;
+
+    if (strcmp(symbol, "+") == 0)
+        return create_atom_function(FN_FOLD_INTEGER_ADD);
+    if (strcmp(symbol, "-") == 0)
+        return create_atom_function(FN_FOLD_INTEGER_SUBTRACT);
+    if (strcmp(symbol, "*") == 0)
+        return create_atom_function(FN_FOLD_INTEGER_MULTIPLY);
+    
+    return atom;
+}
+
+//struct Atom *eval_pair(struct Pair *pair) {
+//}
 
 #endif

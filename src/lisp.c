@@ -40,7 +40,10 @@ int main() {
     struct Pair *p_result = create_pair(result, NULL);
 
     //print_pair(p6);
-    print_pair(p_result);
+    //print_pair(p_result);
+    
+    struct Atom *fn = parse_atom_function(a1);
+    print_atom(fn);
 
     return 0;
 }
