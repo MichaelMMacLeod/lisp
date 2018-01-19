@@ -125,20 +125,20 @@ void print_atom(struct Atom *atom) {
 }
 
 void print_pair(struct Pair *pair) {
-    printf("(");
-
     if (pair->car != NULL) {
-        print_atom(pair->car);
+        if (pair->car->type == PAIR) {
+            printf("(");
+            print_atom(pair->car);
+            printf(")");
+        } else {
+            print_atom(pair->car);
+        }
 
         if (pair->cdr != NULL) {
             printf(" ");
-            
             print_pair(pair->cdr);
         }
-
     }
-
-    printf(")");
 }
 
 #endif
