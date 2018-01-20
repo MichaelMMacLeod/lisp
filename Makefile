@@ -1,4 +1,4 @@
-FILES = src/lisp.c src/types/atom/atom.h
+FILES = src/lisp.c src/functions/repl.h src/types/atom/atom.h
 
 $(shell [ -d build/debug ] || mkdir -p build/debug)
 $(shell [ -d build/release ] || mkdir -p build/release)
