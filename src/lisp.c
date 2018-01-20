@@ -4,7 +4,11 @@
 #include "types/atom/atom.h"
 
 int main() {
-    char *s1 = malloc(sizeof(char) * 10);
+    char *input = malloc(sizeof(char) * 200);
+    strcpy(input, "(+ (* 1 2) 3)");
+    printf("%s ==> %d\n", input, read_atom_type(input));
+
+/*    char *s1 = malloc(sizeof(char) * 10);
     strcpy(s1, "+");
 
     int *i1 = malloc(sizeof(int));
@@ -41,6 +45,6 @@ int main() {
     printf("\n");
     print_pair(result);
     printf("\n");
-    
+    */
     return 0;
 }

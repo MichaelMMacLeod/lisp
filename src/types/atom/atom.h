@@ -228,6 +228,17 @@ struct Atom *create_atom_function(int function_type) {
     return atom;
 }
 
+int parse_function(char *str) {
+    if (strcmp(str, "+") == 0)
+        return FN_FOLD_INTEGER_ADD;
+    if (strcmp(str, "-") == 0)
+        return FN_FOLD_INTEGER_SUBTRACT;
+    if (strcmp(str, "*") == 0)
+        return FN_FOLD_INTEGER_MULTIPLY;
+
+    return -1;
+}
+
 struct Atom *parse_atom_function(struct Atom *atom) {
     char *symbol = atom->symbol;
 
@@ -318,5 +329,69 @@ struct Atom *eval_pair(struct Pair *pair) {
 
     return apply_atom_function(atom, pair->cdr);
 }
+
+int read_atom_type(char *str) {
+    char *p = str;
+
+    if (*p == '(')
+        return PAIR;
+
+    int p_integer = 1;
+
+    while (*p != ' ' && *p != ')') {
+        if (!(*p >= '0' && *p <= '9')) {
+            p_integer = 0;
+        }
+
+        ++p;
+    }
+
+    if (p_integer)
+        return INTEGER;
+
+    int nchars = p - str + 1;
+
+    char *token = malloc(sizeof(char) * nchars);
+    strncpy(token, str, nchars - 1);
+    token[nchars] = '\0';
+
+    int fn = parse_function(token);
+
+    if (fn == -1)
+        return SYMBOL;
+
+    return FUNCTION;
+}
+
+//  read_atom `(+ (* 1 2) 3)` => atom.pair     -> read_pair `+ (* 1 2) 3)`
+//  read_atom `+ (* 1 2) 3)`  => atom.function -> + 
+//  read_atom `(* 1 2) 3)`    => atom.pair     -> read_pair `* 1 2) 3)`
+//  read_atom `* 1 2) 3)`     => atom.function -> *
+//  read_atom `1 2) 3)        => atom.integer  -> 1
+//  read_atom `2) 3)          => atom.integer  -> 2
+//  read_atom `3)`            => atom.integer  -> 3
+
+//  read_atom `(+ (* 1 2) 3)`
+//      atom -> read_pair `+ (* 1 2) 3)`
+//          pair.car -> read_atom `+ (* 1 2) 3)`
+//              atom -> +
+//          pair.cdr -> read_pair `(* 1 2) 3)`
+//              pair.car -> read_atom `(* 1 2) 3)`
+//                  atom -> read_pair `* 1 2) 3)`
+//                      pair.car -> read_atom `* 1 2) 3)`
+//                          atom -> *
+//                      pair.cdr -> read_pair `1 2) 3)`
+//                          pair.car -> read_atom `1 2) 3)`
+//                              atom -> 1
+//                          pair.cdr -> read_pair `2) 3)`
+//                              pair.car -> read_atom `2) 3)`
+//                                  atom -> 2
+//                              pair.cdr -> read_pair `) 3)`
+//                                  NULL
+//              pair.cdr -> read_pair `3)`
+//                  pair.car -> read_atom `3)`
+//                      atom -> 3
+//                  pair.cdr -> read_pair `)`
+//                      NULL
 
 #endif
