@@ -371,6 +371,72 @@ int read_atom_type(char *str) {
 //  read_atom `2) 3)          => atom.integer  -> 2
 //  read_atom `3)`            => atom.integer  -> 3
 
+struct Pair *read_pair(char *str);
+
+struct Atom *read_atom_integer(char *str) {
+    int *i = malloc(sizeof(int));
+    *i = strtol(str, NULL, 10);
+
+    return create_atom_integer(i);
+}
+
+struct Atom *read_atom_symbol(char *str) {
+    char *p = str;
+
+    while (*p != ' ' && *p != ')')
+        ++p;
+
+    int nchars = p - str + 1;
+
+    char *token = malloc(sizeof(char) * nchars);
+    strncpy(token, str, nchars - 1);
+    token[nchars] = '\0';
+
+    return create_atom_symbol(token);
+}
+
+struct Atom *read_atom_pair(char *str) {
+    return create_atom_pair(read_pair(str + 1));
+}
+
+struct Atom *read_atom_function(char *str) {
+    char *p = str;
+
+    while (*p != ' ' && *p != ')')
+        ++p;
+
+    int nchars = p - str + 1;
+
+    char *token = malloc(sizeof(char) * nchars);
+    strncpy(token, str, nchars - 1);
+    token[nchars] = '\0';
+
+    return create_atom_function(parse_function(token));
+}
+
+struct Atom *read_atom(char *str) {
+    char *p = str;
+
+    int type = read_atom_type(p);
+
+    switch (type) {
+        case INTEGER:
+            return read_atom_integer(p);
+            break;
+        case SYMBOL:
+            return read_atom_symbol(p);
+            break;
+        case PAIR:
+            return read_atom_pair(p);
+            break;
+        case FUNCTION:
+            return read_atom_function(p);
+            break;
+        default:
+            BAD_TYPE(type);
+    }
+}
+
 //  read_atom `(+ (* 1 2) 3)`
 //      atom -> read_pair `+ (* 1 2) 3)`
 //          pair.car -> read_atom `+ (* 1 2) 3)`
@@ -393,5 +459,35 @@ int read_atom_type(char *str) {
 //                      atom -> 3
 //                  pair.cdr -> read_pair `)`
 //                      NULL
+
+struct Pair *read_pair(char *str) {
+    char *p = str;
+
+    if (*p == ')')
+        return NULL;
+
+    struct Atom *car = read_atom(p);
+    
+    int nparen = 0;
+
+    do {
+        if (*p == '(')
+            ++nparen;
+        else if (*p == ')')
+            --nparen;
+
+        ++p;
+    } while (nparen != 0);
+    
+    while (*p != ' ' && *p != '(' && *p != ')')
+        ++p;
+
+    while (*p == ' ')
+        ++p;
+    
+    struct Pair *cdr = read_pair(p);
+
+    return create_pair(car, cdr);
+}
 
 #endif
