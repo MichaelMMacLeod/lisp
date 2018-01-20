@@ -6,7 +6,7 @@
 #define READ_BUFFER 1024
 
 struct Atom *read() {
-    int bsize = sizeof(char) * READ_BUFFER;
+    size_t bsize = sizeof(char) * READ_BUFFER;
 
     char *buffer = malloc(bsize);
     MEM_CHECK(buffer);
