@@ -14,6 +14,11 @@ struct Atom *read() {
     printf("lisp> ");
     int nchars = getline(&buffer, &bsize, stdin);
 
+    if (nchars == 1) {
+        printf(" ==> exit\n");
+        exit(0);
+    }
+
     buffer[nchars - 1] = '\0'; // remove '\n'
 
     return read_atom(buffer);
