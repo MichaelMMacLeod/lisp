@@ -363,14 +363,6 @@ int read_atom_type(char *str) {
     return FUNCTION;
 }
 
-//  read_atom `(+ (* 1 2) 3)` => atom.pair     -> read_pair `+ (* 1 2) 3)`
-//  read_atom `+ (* 1 2) 3)`  => atom.function -> + 
-//  read_atom `(* 1 2) 3)`    => atom.pair     -> read_pair `* 1 2) 3)`
-//  read_atom `* 1 2) 3)`     => atom.function -> *
-//  read_atom `1 2) 3)        => atom.integer  -> 1
-//  read_atom `2) 3)          => atom.integer  -> 2
-//  read_atom `3)`            => atom.integer  -> 3
-
 struct Pair *read_pair(char *str);
 
 struct Atom *read_atom_integer(char *str) {
@@ -436,29 +428,6 @@ struct Atom *read_atom(char *str) {
             BAD_TYPE(type);
     }
 }
-
-//  read_atom `(+ (* 1 2) 3)`
-//      atom -> read_pair `+ (* 1 2) 3)`
-//          pair.car -> read_atom `+ (* 1 2) 3)`
-//              atom -> +
-//          pair.cdr -> read_pair `(* 1 2) 3)`
-//              pair.car -> read_atom `(* 1 2) 3)`
-//                  atom -> read_pair `* 1 2) 3)`
-//                      pair.car -> read_atom `* 1 2) 3)`
-//                          atom -> *
-//                      pair.cdr -> read_pair `1 2) 3)`
-//                          pair.car -> read_atom `1 2) 3)`
-//                              atom -> 1
-//                          pair.cdr -> read_pair `2) 3)`
-//                              pair.car -> read_atom `2) 3)`
-//                                  atom -> 2
-//                              pair.cdr -> read_pair `) 3)`
-//                                  NULL
-//              pair.cdr -> read_pair `3)`
-//                  pair.car -> read_atom `3)`
-//                      atom -> 3
-//                  pair.cdr -> read_pair `)`
-//                      NULL
 
 struct Pair *read_pair(char *str) {
     char *p = str;
