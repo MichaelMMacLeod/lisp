@@ -352,10 +352,12 @@ int read_atom_type(char *str) {
     int nchars = p - str + 1;
 
     char *token = malloc(sizeof(char) * nchars);
-    strncpy(token, str, nchars - 1);
-    token[nchars] = '\0';
+    strncpy(token, str, sizeof(char) * nchars);
+    token[nchars - 1] = '\0';
 
     int fn = parse_function(token);
+
+    free(token);
 
     if (fn == -1)
         return SYMBOL;
@@ -381,8 +383,8 @@ struct Atom *read_atom_symbol(char *str) {
     int nchars = p - str + 1;
 
     char *token = malloc(sizeof(char) * nchars);
-    strncpy(token, str, nchars - 1);
-    token[nchars] = '\0';
+    strncpy(token, str, sizeof(char) * nchars);
+    token[nchars - 1] = '\0';
 
     return create_atom_symbol(token);
 }
@@ -400,10 +402,14 @@ struct Atom *read_atom_function(char *str) {
     int nchars = p - str + 1;
 
     char *token = malloc(sizeof(char) * nchars);
-    strncpy(token, str, nchars - 1);
-    token[nchars] = '\0';
+    strncpy(token, str, sizeof(char) * nchars);
+    token[nchars - 1] = '\0';
 
-    return create_atom_function(parse_function(token));
+    int function = parse_function(token);
+
+    free(token);
+
+    return create_atom_function(function);
 }
 
 struct Atom *read_atom(char *str) {
@@ -458,5 +464,58 @@ struct Pair *read_pair(char *str) {
 
     return create_pair(car, cdr);
 }
+
+// enum { SYMBOL, INTEGER, PAIR, FUNCTION } type;
+void free_atom_symbol(struct Atom *atom);
+void free_atom_integer(struct Atom *atom);
+void free_pair(struct Pair *pair);
+void free_atom_pair(struct Atom *atom);
+void free_atom_function(struct Atom *atom);
+
+void free_atom(struct Atom *atom) {
+    switch (atom->type) {
+        case SYMBOL:
+            free_atom_symbol(atom);
+            break;
+        case INTEGER:
+            free_atom_integer(atom);
+            break;
+        case PAIR:
+            free_atom_pair(atom);
+            break;
+        case FUNCTION:
+            free_atom_function(atom);
+            break;
+        default:
+            BAD_TYPE(atom->type);
+    }
+}
+
+void free_atom_symbol(struct Atom *atom) {
+    free(atom->symbol);
+    free(atom);
+}
+
+void free_atom_integer(struct Atom *atom) {
+    free(atom->integer);
+    free(atom);
+}
+
+void free_pair(struct Pair *pair) {
+    free_atom(pair->car);
+
+    if (pair->cdr != NULL)
+        free_pair(pair->cdr);
+}
+
+void free_atom_pair(struct Atom *atom) {
+    free_pair(atom->pair);
+    free(atom);
+}
+
+void free_atom_function(struct Atom *atom) {
+    free(atom);
+}
+
 
 #endif
