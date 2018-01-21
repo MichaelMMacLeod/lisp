@@ -27,17 +27,50 @@ struct Pair {
     struct Pair *cdr;
 };
 
+/* 
+ * create_atom* functions
+ *
+ * Allocates Atoms on the heap.
+ *
+ * create_atom creates an empty Atom. The others will initialze their Atoms
+ * with the values provided.
+ */
 struct Atom *create_atom();
 struct Atom *create_atom_symbol(char *symbol);
 struct Atom *create_atom_integer(int *integer);
 struct Atom *create_atom_pair(struct Pair *pair);
+
+/* 
+ * Allocates a Pair on the heap and initializes it with the given pointers.
+ */
 struct Pair *create_pair(struct Atom *car, struct Pair *cdr);
+
+/* 
+ * print_atom* functions
+ *
+ * Prints the value held inside the Atom.
+ *
+ * print_atom will call the other functions based on the Atom's type.
+ */
 void print_atom_symbol(struct Atom *atom);
 void print_atom_integer(struct Atom *atom);
 void print_atom_pair(struct Atom *atom);
 void print_atom_function(struct Atom *atom);
 void print_atom(struct Atom *atom);
+
+/*
+ * Recursively prints out a linked list of atoms, surrounding the result in
+ * parentheses like so:
+ *
+ *      (+ 1 2)
+ *  or
+ *      (+ 1 (* 3 4))
+ */
 void print_pair(struct Pair *pair);
+
+//  TODO rework_function_application:
+//      rework function application to support more functions than just 
+//      integer-related ones (list, etc).
 struct Atom *fn_integer_add(struct Atom *a, struct Atom *b);
 struct Atom *fn_fold_integer_add(struct Pair *pair);
 struct Atom *fn_integer_subtract(struct Atom *a, struct Atom *b);
@@ -45,7 +78,21 @@ struct Atom *fn_fold_integer_subtract(struct Pair *pair);
 struct Atom *fn_integer_multiply(struct Atom *a, struct Atom *b);
 struct Atom *fn_fold_integer_multiply(struct Pair *pair);
 struct Atom *create_atom_function(int function_type);
+
+/*
+ * Determines what type of function `str` is.
+ *
+ *  ex:
+ *      parse_function("+") 
+ *          => FN_FOLD_INTEGER_ADD
+ *      parse_function("*")
+ *          => FN_FOLD_INTEGER_MULTIPLY
+ *      parse_function("+ (* 2 3) 4)")
+ *          => -1
+ */
 int parse_function(char *str);
+
+// TODO see rework_function_application
 struct Atom *parse_atom_function(struct Atom *atom);
 struct Atom *apply_atom_function(struct Atom *atom, struct Pair *pair);
 struct Atom *eval_atom_symbol(struct Atom *atom);
@@ -54,7 +101,27 @@ struct Atom *eval_atom_pair(struct Atom *atom);
 struct Atom *eval_atom_function(struct Atom *atom);
 struct Atom *eval_atom(struct Atom *atom);
 struct Atom *eval_pair(struct Pair *pair);
+
+/*
+ * Determines what type of Atom is present at the beginning of `str`.
+ *
+ *  ex:
+ *      read_atom_type("(+ 1 2)")
+ *          => PAIR
+ *      read_atom_type("+ 1 2)")
+ *          => FUNCTION
+ *      read_atom_type("1 2)")
+ *          => INTEGER
+ *      read_atom_type("hello_world")
+ *          => SYMBOL
+ */
 int read_atom_type(char *str);
+
+//  TODO parsing-rework:
+//      With the function rework change we are also probably going to have to
+//      change the way we parse input. We might want to pass a parsing rule as
+//      a parameter to each of these functions, which could describe how to
+//      parse input.
 struct Pair *read_pair(char *str);
 struct Atom *read_atom_integer(char *str);
 struct Atom *read_atom_symbol(char *str);
@@ -62,6 +129,14 @@ struct Atom *read_atom_pair(char *str);
 struct Atom *read_atom_function(char *str);
 struct Atom *read_atom(char *str);
 struct Pair *read_pair(char *str);
+
+/*
+ * free_* functions
+ *
+ * Deallocates memory pointed to by the parameter. In the case that the
+ * parameter contains pointers itself free_atom, free_pair, and free_atom_pair
+ * will recursively deallocate those values as well.
+ */
 void free_atom(struct Atom *atom);
 void free_atom_symbol(struct Atom *atom);
 void free_atom_integer(struct Atom *atom);
@@ -466,7 +541,7 @@ struct Pair *read_pair(char *str) {
         return NULL;
 
     struct Atom *car = read_atom(p);
-    
+
     int nparen = 0;
 
     do {
@@ -477,13 +552,13 @@ struct Pair *read_pair(char *str) {
 
         ++p;
     } while (nparen != 0);
-    
+
     while (*p != ' ' && *p != '(' && *p != ')')
         ++p;
 
     while (*p == ' ')
         ++p;
-    
+
     struct Pair *cdr = read_pair(p);
 
     return create_pair(car, cdr);
