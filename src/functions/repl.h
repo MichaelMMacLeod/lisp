@@ -15,13 +15,19 @@ struct Atom *read() {
     int nchars = getline(&buffer, &bsize, stdin);
 
     if (nchars == 1) {
+        free(buffer);
+
         printf(" ==> exit\n");
         exit(0);
     }
 
     buffer[nchars - 1] = '\0'; // remove '\n'
 
-    return read_atom(buffer);
+    struct Atom *atom = read_atom(buffer);
+
+    free(buffer);
+
+    return atom;
 }
 
 struct Atom *eval(struct Atom *atom) {
@@ -32,6 +38,8 @@ void print(struct Atom *atom) {
     printf(" ==> ");
     print_atom(atom);
     printf("\n");
+
+    free_atom(atom);
 }
 
 #endif
