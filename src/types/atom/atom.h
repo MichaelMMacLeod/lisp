@@ -32,16 +32,42 @@ struct Atom *create_atom_symbol(char *symbol);
 struct Atom *create_atom_integer(int *integer);
 struct Atom *create_atom_pair(struct Pair *pair);
 struct Pair *create_pair(struct Atom *car, struct Pair *cdr);
-
 void print_atom_symbol(struct Atom *atom);
 void print_atom_integer(struct Atom *atom);
 void print_atom_pair(struct Atom *atom);
+void print_atom_function(struct Atom *atom);
 void print_atom(struct Atom *atom);
 void print_pair(struct Pair *pair);
-
-struct Atom *eval_pair(struct Pair *pair);
-
+struct Atom *fn_integer_add(struct Atom *a, struct Atom *b);
+struct Atom *fn_fold_integer_add(struct Pair *pair);
+struct Atom *fn_integer_subtract(struct Atom *a, struct Atom *b);
+struct Atom *fn_fold_integer_subtract(struct Pair *pair);
+struct Atom *fn_integer_multiply(struct Atom *a, struct Atom *b);
+struct Atom *fn_fold_integer_multiply(struct Pair *pair);
+struct Atom *create_atom_function(int function_type);
+int parse_function(char *str);
+struct Atom *parse_atom_function(struct Atom *atom);
+struct Atom *apply_atom_function(struct Atom *atom, struct Pair *pair);
+struct Atom *eval_atom_symbol(struct Atom *atom);
+struct Atom *eval_atom_integer(struct Atom *atom);
+struct Atom *eval_atom_pair(struct Atom *atom);
+struct Atom *eval_atom_function(struct Atom *atom);
 struct Atom *eval_atom(struct Atom *atom);
+struct Atom *eval_pair(struct Pair *pair);
+int read_atom_type(char *str);
+struct Pair *read_pair(char *str);
+struct Atom *read_atom_integer(char *str);
+struct Atom *read_atom_symbol(char *str);
+struct Atom *read_atom_pair(char *str);
+struct Atom *read_atom_function(char *str);
+struct Atom *read_atom(char *str);
+struct Pair *read_pair(char *str);
+void free_atom(struct Atom *atom);
+void free_atom_symbol(struct Atom *atom);
+void free_atom_integer(struct Atom *atom);
+void free_pair(struct Pair *pair);
+void free_atom_pair(struct Atom *atom);
+void free_atom_function(struct Atom *atom);
 
 struct Atom *create_atom() {
     struct Atom *atom = malloc(sizeof(struct Atom));
@@ -365,8 +391,6 @@ int read_atom_type(char *str) {
     return FUNCTION;
 }
 
-struct Pair *read_pair(char *str);
-
 struct Atom *read_atom_integer(char *str) {
     int *i = malloc(sizeof(int));
     *i = strtol(str, NULL, 10);
@@ -464,13 +488,6 @@ struct Pair *read_pair(char *str) {
 
     return create_pair(car, cdr);
 }
-
-// enum { SYMBOL, INTEGER, PAIR, FUNCTION } type;
-void free_atom_symbol(struct Atom *atom);
-void free_atom_integer(struct Atom *atom);
-void free_pair(struct Pair *pair);
-void free_atom_pair(struct Atom *atom);
-void free_atom_function(struct Atom *atom);
 
 void free_atom(struct Atom *atom) {
     switch (atom->type) {
