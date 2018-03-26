@@ -1,12 +1,9 @@
 #ifndef INCLUDE_READ_H
 #define INCLUDE_READ_H
 
-//#include "stream.h"
 #include "sexpr.h"
 #include "map.h"
 #include <string.h>
-
-#define MAX_SYMBOL_SIZE 1000
 
 char upper_case(char c) {
     if (c >= 97 && c <= 122) {
@@ -28,7 +25,15 @@ char upper_case(char c) {
 struct sexpr *read_symbol(char *input, struct map *package) {
     struct sexpr *result = malloc(sizeof(struct sexpr));
 
-    char *symbol = malloc(MAX_SYMBOL_SIZE * sizeof(char)); // todo: fix buffer overflow possibility
+    int size = 1;
+    char *p = input;
+
+    while (*p != '\0') {
+        ++size;
+        ++p;
+    }
+
+    char *symbol = malloc(size * sizeof(char));
     char *symbol_start = symbol;
 
     char c = *input;
@@ -63,123 +68,129 @@ struct sexpr *read_symbol(char *input, struct map *package) {
     return result;
 }
 
-//struct sexpr *cons(struct sexpr *head, struct pair *tail) {
-//    struct sexpr *result_sexpr = malloc(sizeof(struct sexpr));
-//    result_sexpr->type = PAIR;
+// cons - construct a linked list.
+struct pair *cons(struct sexpr *head, struct pair *tail) {
+    struct pair *result = malloc(sizeof(struct pair));
+
+    result->head = head;
+    result->tail = tail;
+
+    return result;
+}
+
+// copy_head_str - create a '\0' delimited string out of the next valid
+// sexpr.
 //
-//    struct pair *result_pair = malloc(sizeof(struct pair));
-//    result_pair->head = head;
-//    result_pair->tail = tail;
+// The result points to a copy of a portion of the input.
+char *copy_head_str(char *input) {
+    char *p = input;
+
+    int size = 0;
+
+    int n_open = 0;
+
+    while (1) {
+        if ((*p == ' ' || *p == ')') && n_open == 0) {
+            break;
+        }
+
+        if (*p == '(') {
+            ++n_open;
+        } else if (*p == ')') {
+            --n_open;
+        }
+
+        ++size;
+        ++p;
+    }
+
+    char *result = malloc(size * sizeof(char));
+    char *r = result;
+
+    p = input;
+
+    for (int i = 0; i < size; ++i) {
+        *r = *p;
+        
+        ++r;
+        ++p;
+    }
+
+    *r = '\0';
+
+    return result;
+}
+
+// tail_str - the tail of the current pair string.
 //
-//    result_sexpr->pair = result_pair;
+// The result is part of the same input string - not a copy.
 //
-//    return result_sexpr;
-//}
+// The result is the location of the ' ' or ')' following the first sexpr,
+// meaning that to read the second sexpr, you need to disregard any spaces.
+char *tail_str(char *input) {
+    int n_open = 0;
+
+    while (1) {
+        if ((*input == ' ' || *input == ')') && n_open == 0) {
+            break;
+        }
+
+        if (*input == '(') {
+            ++n_open;
+        } else if (*input == ')') {
+            --n_open;
+        }
+
+        ++input;
+    }
+
+    return input;
+}
+
+struct sexpr *read_sexpr(char *input, struct map *package);
+
+// read_pair - read a linked list from a string until the ending ')'.
 //
-//struct sexpr *read_sexpr(char *input);
-//
-//struct sexpr *read_pair(char *input) {
-//    char is_nil_p = peek_char(input);
-//
-//    if (is_nil_p == ')' || is_nil_p == '\0') {
-//        struct sexpr *nil_pair = malloc(sizeof(struct sexpr));
-//        nil_pair->type = PAIR;
-//        nil_pair->pair = NULL;
-//
-//        return nil_pair;
-//    }
-//
-//    char *sexpr_str = malloc(MAX_SYMBOL_SIZE * sizeof(char)); // todo
-//    char *sexpr_str_start = sexpr_str;
-//
-//    char c;
-//    int n_open = 1;
-//
-//    while (1) {
-//        c = read_char(input);
-//        ++input;
-//
-//        if (c == '(') {
-//            ++n_open;
-//        } else if (c == ')') {
-//            --n_open;
-//        }
-//
-//        if (n_open == 0) {
-//            break;
-//        }
-//
-//        *sexpr_str = c;
-//
-//        ++sexpr_str;
-//    }
-//
-//    *sexpr_str = '\0';
-//
-//    struct sexpr *head = read_sexpr(sexpr_str_start);
-//
-//    while (1) {
-//        if (peek_char(input) != ' ') {
-//            break;
-//        }
-//
-//        read_char(input);
-//        ++input;
-//    }
-//
-//    struct sexpr *tail = read_pair(input);
-//
-//    return cons(head, tail->pair);
-//}
-//
-//struct sexpr *read_sexpr(char *input) {
-//    char c = read_char(input);
-//
-//    if (c == '(') {
-//        ++input;
-//        return read_pair(input);
-//    } else {
-//        return read_symbol(input);
-//    }
-//}
-//
-//int str_equal(char *a, char *b) {
-//    return strcmp(a, b) != 0;
-//}
-//
-//void print_symbol(char *symbol);
-//void print_pair(struct pair *pair);
-//void print_sexpr(struct sexpr *x);
-//
-//void print_symbol(char *symbol) {
-//    printf("%s", symbol);
-//}
-//
-//void print_pair(struct pair *pair) {
-//    if (pair == NULL) {
-//        return;
-//    }
-//
-//    printf("(");
-//
-//    print_sexpr(pair->head);
-//
-//
-//    if (pair->tail == NULL) {
-//        printf(" ");
-//
-//        print_pair(pair->tail);
-//    }
-//
-//    printf(")");
-//}
-//
-//void print_sexpr(struct sexpr *x) {
-//    if (x->type == SYMBOL) {
-//        print_symbol(x->symbol);
-//    } else if (x->type == PAIR) {
-//        print_pair(x->pair);
-//    }
-//}
+// The begining '(' should NOT be included when calling read_pair.
+struct sexpr *read_pair(char *input, struct map *package) {
+    while (*input == ' ') {
+        ++input;
+    }
+
+    if (*input == ')') {
+        return NULL;
+    }
+
+    char *head_str = copy_head_str(input);
+    struct sexpr *head = read_sexpr(head_str, package);
+
+    char *tail_str_pos = tail_str(input);
+    struct sexpr *tail = read_pair(tail_str_pos, package);
+
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = PAIR;
+
+    if (tail == NULL) {
+        result->pair = cons(head, NULL);
+    } else {
+        result->pair = cons(head, tail->pair);
+    }
+
+    return result;
+}
+
+struct sexpr *read_sexpr(char *input, struct map *package) {
+    while (*input == ' ') {
+        ++input;
+    }
+
+    if (*input == '(') {
+        ++input;
+
+        return read_pair(input, package);
+    } else {
+        return read_symbol(input, package);
+    }
+}
 
 #endif

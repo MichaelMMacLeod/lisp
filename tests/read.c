@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "../read.h"
+#include "../print.h"
 
 int read_symbol_is_correct_symbol() {
     struct map *package = malloc(sizeof(struct map));
@@ -77,6 +78,45 @@ int read_symbol_returns_interned_symbol() {
     return returns_interned_symbol;
 }
 
+int copy_head_str_is_a_copy() {
+    char *input = malloc(21 * sizeof(char));
+    strcpy(input, "(hello world) extra)");
+
+    char *next_sexpr = copy_head_str(input);
+
+    int is_a_copy = next_sexpr != input;
+
+    return is_a_copy;
+}
+
+int copy_head_str_is_correct_sexpr() {
+    char *input = malloc(21 * sizeof(char));
+    strcpy(input, "(hello world) extra)");
+
+    char *next_sexpr = copy_head_str(input);
+
+    char *correct_sexpr = malloc(14 * sizeof(char));
+    strcpy(correct_sexpr, "(hello world)");
+
+    int is_correct_sexpr = strcmp(correct_sexpr, next_sexpr) == 0;
+
+    return is_correct_sexpr;
+}
+
+int tail_str_is_correct_tail() {
+    char *input = malloc(21 * sizeof(char));
+    strcpy(input, "(hello world) extra)");
+
+    char *tail = tail_str(input);
+
+    char *correct_tail = malloc(8 * sizeof(char));
+    strcpy(correct_tail, " extra)");
+
+    int is_correct_tail = strcmp(correct_tail, tail) == 0;
+
+    return is_correct_tail;
+}
+
 int main() {
     if (read_symbol_has_correct_type()) {
         printf("read_symbol_has_correct_type - pass\n");
@@ -100,5 +140,23 @@ int main() {
         printf("read_symbol_returns_interned_symbol - pass\n");
     } else {
         printf("read_symbol_returns_interned_symbol - fail\n");
+    }
+
+    if (copy_head_str_is_a_copy()) {
+        printf("copy_head_str_is_a_copy - pass\n");
+    } else {
+        printf("copy_head_str_is_a_copy - FAIL\n");
+    }
+
+    if (copy_head_str_is_correct_sexpr()) {
+        printf("copy_head_str_is_correct_sexpr - pass\n");
+    } else {
+        printf("copy_head_str_is_correct_sexpr - FAIL\n");
+    }
+
+    if (tail_str_is_correct_tail()) {
+        printf("tail_str_is_correct_tail - pass\n");
+    } else {
+        printf("tail_str_is_correct_tail - FAIL\n");
     }
 }
