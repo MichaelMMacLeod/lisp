@@ -1,14 +1,14 @@
+#include "../map.h"
 #include "../sexpr.h"
 #include "../read.h"
 #include "../print.h"
+#include "../package.h"
 
 void test_print() {
+    struct map *package = create_default_package();
+
     char *input = malloc(1000 * sizeof(char));
     strcpy(input, "(hello (world) hello)");
-
-    struct map *package = malloc(sizeof(struct map));
-    package->size = 0;
-    package->items = malloc(0);
 
     struct sexpr *result = read_sexpr(input, package);
 

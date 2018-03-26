@@ -3,10 +3,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "sexpr.h"
 
 struct map_item {
     char *name;
-    // binding ?
+    struct sexpr *binding;
 };
 
 struct map {

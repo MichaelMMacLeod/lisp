@@ -1,12 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "../map.h"
+#include "../sexpr.h"
+#include "../package.h"
 #include "../read.h"
 
 int read_symbol_is_correct_symbol() {
-    struct map *package = malloc(sizeof(struct map));
-    package->size = 0;
-    package->items = malloc(0);
+    struct map *package = create_default_package();
 
     char *str = malloc(6 * sizeof(char));
     strcpy(str, "hello");
@@ -22,9 +23,7 @@ int read_symbol_is_correct_symbol() {
 }
 
 int read_symbol_has_correct_type() {
-    struct map *package = malloc(sizeof(struct map));
-    package->size = 0;
-    package->items = malloc(0);
+    struct map *package = create_default_package();
 
     char *str = malloc(6 * sizeof(char));
     strcpy(str, "hello");
@@ -40,24 +39,25 @@ int read_symbol_has_correct_type() {
 }
 
 int read_symbol_interns_uninterned_symbol() {
-    struct map *package = malloc(sizeof(struct map));
-    package->size = 0;
-    package->items = malloc(0);
+    struct map *package = create_default_package();
 
     char *str = malloc(6 * sizeof(char));
     strcpy(str, "hello");
 
-    struct sexpr *result = read_symbol(str, package);
+    read_symbol(str, package);
 
-    int interns_uninterned_symbol = package->items[0].name == result->symbol;
-    
+    char *interned_str = malloc(6 * sizeof(char));
+    strcpy(interned_str, "HELLO");
+
+    struct map_item *interned_item = get_by_name(package, interned_str);
+
+    int interns_uninterned_symbol = interned_item != NULL;
+
     return interns_uninterned_symbol;
 }
 
 int read_symbol_returns_interned_symbol() {
-    struct map *package = malloc(sizeof(struct map));
-    package->size = 0;
-    package->items = malloc(0);
+    struct map *package = create_default_package();
 
     char *str = malloc(6 * sizeof(char));
     strcpy(str, "HELLO");
@@ -72,7 +72,7 @@ int read_symbol_returns_interned_symbol() {
 
     struct sexpr *result = read_symbol(str_to_read, package);
 
-    int returns_interned_symbol = package->items[0].name == result->symbol;
+    int returns_interned_symbol = package->items[1].name == result->symbol;
     
     return returns_interned_symbol;
 }

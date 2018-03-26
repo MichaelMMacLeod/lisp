@@ -3,80 +3,8 @@
 
 #include "sexpr.h"
 #include "map.h"
+#include "package.h"
 #include <string.h>
-
-char upper_case(char c) {
-    if (c >= 97 && c <= 122) {
-        return c - 32;
-    } else {
-        return c;
-    }
-}
-
-// read_symbol - read a '\0'-delimited string and intern it in a packge.
-//
-// read_symbol will convert the symbol to full upercase. This helps the
-// programmer determine wether text has been passed through the reader or not.
-//
-// If the symbol is already present in the package, read_symbol will use its
-// existing reference. This means that reading the symbol "hello" twice will
-// result in one symbol, "HELLO", interned in the package, with each call to
-// read_symbol returning a sexpr with a reference to that one symbol.
-struct sexpr *read_symbol(char *input, struct map *package) {
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-
-    int size = 1;
-    char *p = input;
-
-    while (*p != '\0') {
-        ++size;
-        ++p;
-    }
-
-    char *symbol = malloc(size * sizeof(char));
-    char *symbol_start = symbol;
-
-    char c = *input;
-    ++input;
-
-    while (c != '\0') {
-        *symbol = upper_case(c);
-
-        ++symbol;
-
-        c = *input;
-        ++input;
-    }
-
-    *symbol = '\0';
-
-    struct map_item *interned_item = get_by_name(package, symbol_start);
-    
-    if (interned_item == NULL) {
-        interned_item = malloc(sizeof(struct map_item));
-        interned_item->name = symbol_start;
-
-        add(package, interned_item);
-
-        result->type = SYMBOL;
-        result->symbol = symbol_start;
-    } else {
-        result->type = SYMBOL;
-        result->symbol = interned_item->name;
-    }
-
-    return result;
-}
-
-// cons - construct a linked list.
-struct pair *cons(struct sexpr *head, struct pair *tail) {
-    struct pair *result = malloc(sizeof(struct pair));
-
-    result->head = head;
-    result->tail = tail;
-
-    return result;
-}
 
 // copy_head_str - create a '\0' delimited string out of the next valid
 // sexpr.
@@ -90,7 +18,7 @@ char *copy_head_str(char *input) {
     int n_open = 0;
 
     while (1) {
-        if ((*p == ' ' || *p == ')') && n_open == 0) {
+        if ((*p == ' ' || *p == ')' || *p == '\0') && n_open == 0) {
             break;
         }
 
@@ -117,6 +45,42 @@ char *copy_head_str(char *input) {
     }
 
     *r = '\0';
+
+    return result;
+}
+
+// read_symbol - read a '\0'-delimited string and intern it in a packge.
+//
+// read_symbol will convert the symbol to full upercase. This helps the
+// programmer determine wether text has been passed through the reader or not.
+//
+// If the symbol is already present in the package, read_symbol will use its
+// existing reference. This means that reading the symbol "hello" twice will
+// result in one symbol, "HELLO", interned in the package, with each call to
+// read_symbol returning a sexpr with a reference to that one symbol.
+struct sexpr *read_symbol(char *input, struct map *package) {
+    char *symbol = copy_head_str(input);
+
+    struct map_item *item = malloc(sizeof(struct map_item));
+    item->name = symbol;
+    item->binding = NULL;
+    
+    item = intern(item, package);
+
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = SYMBOL;
+    result->symbol = item->name;
+
+    return result;
+}
+
+
+// cons - construct a linked list.
+struct pair *cons(struct sexpr *head, struct pair *tail) {
+    struct pair *result = malloc(sizeof(struct pair));
+
+    result->head = head;
+    result->tail = tail;
 
     return result;
 }
@@ -179,6 +143,7 @@ struct sexpr *read_pair(char *input, struct map *package) {
     return result;
 }
 
+// read_sexpr - read an s-expression.
 struct sexpr *read_sexpr(char *input, struct map *package) {
     while (*input == ' ') {
         ++input;

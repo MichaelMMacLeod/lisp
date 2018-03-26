@@ -21,6 +21,10 @@ void print_pair(struct pair *p) {
 }
 
 void print_sexpr(struct sexpr *s) {
+    if (s == NULL) {
+        return;
+    }
+
     if (s->type == SYMBOL) {
         print_symbol(s->symbol);
     } else if (s->type == PAIR) {
