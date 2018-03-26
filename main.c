@@ -19,7 +19,7 @@ int main() {
         getline(&buffer, &bsize, stdin);
 
         struct sexpr *read_step = read_sexpr(buffer, package);
-        struct sexpr *eval_step = eval_sexpr(read_step, package);
+        struct sexpr *eval_step = eval_sexpr(read_step);
         
         print_sexpr(eval_step);
 
