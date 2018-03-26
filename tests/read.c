@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "../read.h"
-#include "../print.h"
 
 int read_symbol_is_correct_symbol() {
     struct map *package = malloc(sizeof(struct map));
