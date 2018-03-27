@@ -74,7 +74,6 @@ struct sexpr *read_symbol(char *input, struct map *package) {
     return result;
 }
 
-
 // cons - construct a linked list.
 struct pair *cons(struct sexpr *head, struct pair *tail) {
     struct pair *result = malloc(sizeof(struct pair));
@@ -143,6 +142,29 @@ struct sexpr *read_pair(char *input, struct map *package) {
     return result;
 }
 
+struct sexpr *read_quotted(char *input, struct map *package) {
+    char *quote_str = malloc(7 * sizeof(char));
+    strcpy(quote_str, "QUOTE");
+
+    struct sexpr *quotted_sexpr = malloc(sizeof(struct sexpr));
+    quotted_sexpr->type = SYMBOL;
+    quotted_sexpr->symbol = quote_str;
+
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = PAIR;
+
+    result->pair = malloc(sizeof(struct pair));
+
+    struct pair *quotted_pair = malloc(sizeof(struct pair));
+    quotted_pair->head = read_sexpr(input, package);
+    quotted_pair->tail = NULL;
+
+    result->pair->head = quotted_sexpr;
+    result->pair->tail = quotted_pair;
+
+    return result;
+}
+
 // read_sexpr - read an s-expression.
 struct sexpr *read_sexpr(char *input, struct map *package) {
     while (*input == ' ') {
@@ -153,6 +175,10 @@ struct sexpr *read_sexpr(char *input, struct map *package) {
         ++input;
 
         return read_pair(input, package);
+    } else if (*input == '\'') {
+        ++input;
+
+        return read_quotted(input, package);
     } else {
         return read_symbol(input, package);
     }
