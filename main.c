@@ -16,7 +16,8 @@ int main() {
         
         printf("> ");
 
-        getline(&buffer, &bsize, stdin);
+        int size = getline(&buffer, &bsize, stdin);
+        buffer[size - 1] = '\0';
 
         struct sexpr *read_step = read_sexpr(buffer, package);
         struct sexpr *eval_step = eval_sexpr(read_step);

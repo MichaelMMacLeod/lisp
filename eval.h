@@ -70,6 +70,18 @@ int special_eq_p(struct sexpr *form) {
     exit(1);
 }
 
+int self_evaluating_p(struct sexpr *form) {
+    char *nil_str = "NIL";
+
+    if (form->type == SYMBOL) {
+        if (strcmp(nil_str, form->symbol) == 0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 struct sexpr *interpret_quote(struct pair *arg) {
     return arg->head;
 }
@@ -140,6 +152,8 @@ struct sexpr *eval_sexpr(struct sexpr *form) {
         return interpret_tail(form->pair->tail);
     } else if (special_eq_p(form)) {
         return interpret_eq(form->pair->tail);
+    } else if (self_evaluating_p(form)) {
+        return form;
     }
 
     printf("eval_sexpr - undefined form\n");
