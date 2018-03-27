@@ -6,8 +6,16 @@ $ gcc main.c
 
 ### Usage
 
-Currently supports quote, list, head, and tail.
-'symbol is a reader macro that maps to (quote symbol)
+Currently supports the following:
+
+```
+- quote (and a ' reader macro)
+- list operations
+    - list
+    - head
+    - tail
+- eq (pointer equality)
+```
 
 ```
 $ ./a.out

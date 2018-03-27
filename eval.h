@@ -57,6 +57,19 @@ int special_tail_p(struct sexpr *form) {
     exit(1);
 }
 
+int special_eq_p(struct sexpr *form) {
+    char *eq_str = "EQ";
+
+    if (form->type == SYMBOL) {
+        return 0;
+    } else if (form->type == PAIR) {
+        return strcmp(eq_str, form->pair->head->symbol) == 0;
+    }
+
+    printf("special_eq_p - undefined form type\n");
+    exit(1);
+}
+
 struct sexpr *interpret_quote(struct pair *arg) {
     return arg->head;
 }
@@ -85,6 +98,27 @@ struct sexpr *interpret_tail(struct pair *arg) {
     return result;
 }
 
+struct sexpr *interpret_eq(struct pair *arg) {
+    arg = eval_pair(arg);
+
+    char *t_str = malloc(2 * sizeof(char));
+    strcpy(t_str, "T");
+
+    char *nil_str = malloc(4 * sizeof(char));
+    strcpy(nil_str, "NIL");
+
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = SYMBOL;
+    result->symbol = nil_str;
+
+    if (arg->head->type == SYMBOL && arg->tail->head->type == SYMBOL
+            && arg->head->symbol == arg->tail->head->symbol) {
+        result->symbol = t_str;
+    }
+
+    return result;
+}
+
 struct pair *eval_pair(struct pair *p) {
     p->head = eval_sexpr(p->head);
 
@@ -104,6 +138,8 @@ struct sexpr *eval_sexpr(struct sexpr *form) {
         return interpret_head(form->pair->tail);
     } else if (special_tail_p(form)) {
         return interpret_tail(form->pair->tail);
+    } else if (special_eq_p(form)) {
+        return interpret_eq(form->pair->tail);
     }
 
     printf("eval_sexpr - undefined form\n");
