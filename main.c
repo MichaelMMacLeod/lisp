@@ -19,7 +19,7 @@ int main() {
         buffer[size - 1] = '\0';
 
         struct sexpr *read_step = read_sexpr(buffer, environment);
-        struct sexpr *eval_step = eval_sexpr(read_step);
+        struct sexpr *eval_step = eval_sexpr(read_step, environment);
         
         print_sexpr(eval_step);
 

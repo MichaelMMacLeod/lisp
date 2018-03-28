@@ -2,22 +2,23 @@
 #define INCLUDE_EVAL_H
 
 #include "sexpr.h"
+#include "env.h"
 
-int special_quote_p(struct sexpr *form) {
-    char *nil_str = "QUOTE";
+int special_quote_p(struct sexpr *form, struct env *environment) {
+    char *quote_str = get_binding("QUOTE", environment)->symbol;
 
     if (form->type == SYMBOL) {
         return 0;
     } else if (form->type == PAIR) {
-        return strcmp(nil_str, form->pair->head->symbol) == 0;
+        return strcmp(quote_str, form->pair->head->symbol) == 0;
     }
 
     printf("special_quote_p - undefined form type\n");
     exit(1);
 }
 
-int special_list_p(struct sexpr *form) {
-    char *list_str = "LIST";
+int special_list_p(struct sexpr *form, struct env *environment) {
+    char *list_str = get_binding("LIST", environment)->symbol;
 
     if (form->type == SYMBOL) {
         return 0;
@@ -29,8 +30,8 @@ int special_list_p(struct sexpr *form) {
     exit(1);
 }
 
-int special_head_p(struct sexpr *form) {
-    char *head_str = "HEAD";
+int special_head_p(struct sexpr *form, struct env *environment) {
+    char *head_str = get_binding("HEAD", environment)->symbol;
 
     if (form->type == SYMBOL) {
         return 0;
@@ -42,8 +43,8 @@ int special_head_p(struct sexpr *form) {
     exit(1);
 }
 
-int special_tail_p(struct sexpr *form) {
-    char *tail_str = "TAIL";
+int special_tail_p(struct sexpr *form, struct env *environment) {
+    char *tail_str = get_binding("TAIL", environment)->symbol;
 
     if (form->type == SYMBOL) {
         return 0;
@@ -55,8 +56,8 @@ int special_tail_p(struct sexpr *form) {
     exit(1);
 }
 
-int special_eq_p(struct sexpr *form) {
-    char *eq_str = "EQ";
+int special_eq_p(struct sexpr *form, struct env *environment) {
+    char *eq_str = get_binding("EQ", environment)->symbol;
 
     if (form->type == SYMBOL) {
         return 0;
@@ -68,8 +69,8 @@ int special_eq_p(struct sexpr *form) {
     exit(1);
 }
 
-int self_evaluating_p(struct sexpr *form) {
-    char *nil_str = "NIL";
+int self_evaluating_p(struct sexpr *form, struct env *environment) {
+    char *nil_str = get_binding("NIL", environment)->symbol;
 
     if (form->type == SYMBOL) {
         if (strcmp(nil_str, form->symbol) == 0) {
@@ -80,42 +81,39 @@ int self_evaluating_p(struct sexpr *form) {
     return 0;
 }
 
-struct sexpr *interpret_quote(struct pair *arg) {
+struct sexpr *interpret_quote(struct pair *arg, struct env *environment) {
     return arg->head;
 }
 
-struct pair *eval_pair(struct pair *p);
+struct pair *eval_pair(struct pair *p, struct env *environment);
 
-struct sexpr *interpret_list(struct pair *arg) {
+struct sexpr *interpret_list(struct pair *arg, struct env *environment) {
     struct sexpr *result = malloc(sizeof(struct sexpr));
     result->type = PAIR;
-    result->pair = eval_pair(arg);
+    result->pair = eval_pair(arg, environment);
 
     return result;
 }
 
-struct sexpr *eval_sexpr(struct sexpr *form);
+struct sexpr *eval_sexpr(struct sexpr *form, struct env *environment);
 
-struct sexpr *interpret_head(struct pair *arg) {
-    return eval_sexpr(arg->head)->pair->head;
+struct sexpr *interpret_head(struct pair *arg, struct env *environment) {
+    return eval_sexpr(arg->head, environment)->pair->head;
 }
 
-struct sexpr *interpret_tail(struct pair *arg) {
+struct sexpr *interpret_tail(struct pair *arg, struct env *environment) {
     struct sexpr *result = malloc(sizeof(struct sexpr));
     result->type = PAIR;
-    result->pair = eval_sexpr(arg->head)->pair->tail;
+    result->pair = eval_sexpr(arg->head, environment)->pair->tail;
 
     return result;
 }
 
-struct sexpr *interpret_eq(struct pair *arg) {
-    arg = eval_pair(arg);
+struct sexpr *interpret_eq(struct pair *arg, struct env *environment) {
+    arg = eval_pair(arg, environment);
 
-    char *t_str = malloc(2 * sizeof(char));
-    strcpy(t_str, "T");
-
-    char *nil_str = malloc(4 * sizeof(char));
-    strcpy(nil_str, "NIL");
+    char *t_str = get_binding("T", environment)->symbol;
+    char *nil_str = get_binding("NIL", environment)->symbol;
 
     struct sexpr *result = malloc(sizeof(struct sexpr));
     result->type = SYMBOL;
@@ -129,28 +127,28 @@ struct sexpr *interpret_eq(struct pair *arg) {
     return result;
 }
 
-struct pair *eval_pair(struct pair *p) {
-    p->head = eval_sexpr(p->head);
+struct pair *eval_pair(struct pair *p, struct env *environment) {
+    p->head = eval_sexpr(p->head, environment);
 
     if (p->tail != NULL) {
-        p->tail = eval_pair(p->tail);
+        p->tail = eval_pair(p->tail, environment);
     }
 
     return p;
 }
 
-struct sexpr *eval_sexpr(struct sexpr *form) {
-    if (special_quote_p(form)) {
-        return interpret_quote(form->pair->tail);
-    } else if (special_list_p(form)) {
-        return interpret_list(form->pair->tail);
-    } else if (special_head_p(form)) {
-        return interpret_head(form->pair->tail);
-    } else if (special_tail_p(form)) {
-        return interpret_tail(form->pair->tail);
-    } else if (special_eq_p(form)) {
-        return interpret_eq(form->pair->tail);
-    } else if (self_evaluating_p(form)) {
+struct sexpr *eval_sexpr(struct sexpr *form, struct env *environment) {
+    if (special_quote_p(form, environment)) {
+        return interpret_quote(form->pair->tail, environment);
+    } else if (special_list_p(form, environment)) {
+        return interpret_list(form->pair->tail, environment);
+    } else if (special_head_p(form, environment)) {
+        return interpret_head(form->pair->tail, environment);
+    } else if (special_tail_p(form, environment)) {
+        return interpret_tail(form->pair->tail, environment);
+    } else if (special_eq_p(form, environment)) {
+        return interpret_eq(form->pair->tail, environment);
+    } else if (self_evaluating_p(form, environment)) {
         return form;
     }
 
