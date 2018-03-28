@@ -78,6 +78,7 @@ struct env *create_default_env() {
     char *str_list = malloc(5 * sizeof(char));
     char *str_head = malloc(5 * sizeof(char));
     char *str_tail = malloc(5 * sizeof(char));
+    char *str_eq = malloc(3 * sizeof(char));
 
     strcpy(str_nil, "NIL");
     strcpy(str_t, "T");
@@ -85,6 +86,7 @@ struct env *create_default_env() {
     strcpy(str_list, "LIST");
     strcpy(str_head, "HEAD");
     strcpy(str_tail, "TAIL");
+    strcpy(str_eq, "EQ");
 
     struct env *e = malloc(sizeof(struct env));
     e->size = 0;
@@ -96,6 +98,7 @@ struct env *create_default_env() {
     add_null_binding(str_list, e);
     add_null_binding(str_head, e);
     add_null_binding(str_tail, e);
+    add_null_binding(str_eq, e);
 
     return e;
 }
