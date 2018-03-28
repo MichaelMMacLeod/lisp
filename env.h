@@ -73,12 +73,14 @@ struct binding *add_null_binding(char *symbol, struct env *e) {
 // create_default_env - create an environment with default bindings.
 struct env *create_default_env() {
     char *str_nil = malloc(4 * sizeof(char));
+    char *str_t = malloc(2 * sizeof(char));
     char *str_quote = malloc(6 * sizeof(char));
     char *str_list = malloc(5 * sizeof(char));
     char *str_head = malloc(5 * sizeof(char));
     char *str_tail = malloc(5 * sizeof(char));
 
     strcpy(str_nil, "NIL");
+    strcpy(str_t, "T");
     strcpy(str_quote, "QUOTE");
     strcpy(str_list, "LIST");
     strcpy(str_head, "HEAD");
@@ -89,6 +91,7 @@ struct env *create_default_env() {
     e->bindings = malloc(0);
 
     add_null_binding(str_nil, e);
+    add_null_binding(str_t, e);
     add_null_binding(str_quote, e);
     add_null_binding(str_list, e);
     add_null_binding(str_head, e);
