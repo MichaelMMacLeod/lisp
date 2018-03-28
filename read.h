@@ -1,10 +1,9 @@
 #ifndef INCLUDE_READ_H
 #define INCLUDE_READ_H
 
-#include "sexpr.h"
-#include "map.h"
-#include "package.h"
 #include <string.h>
+#include "sexpr.h"
+#include "env.h"
 
 // copy_head_str - create a '\0' delimited string out of the next valid
 // sexpr.
@@ -49,27 +48,30 @@ char *copy_head_str(char *input) {
     return result;
 }
 
-// read_symbol - read a '\0'-delimited string and intern it in a packge.
-//
-// read_symbol will convert the symbol to full upercase. This helps the
-// programmer determine wether text has been passed through the reader or not.
-//
-// If the symbol is already present in the package, read_symbol will use its
-// existing reference. This means that reading the symbol "hello" twice will
-// result in one symbol, "HELLO", interned in the package, with each call to
-// read_symbol returning a sexpr with a reference to that one symbol.
-struct sexpr *read_symbol(char *input, struct map *package) {
-    char *symbol = copy_head_str(input);
+// upcase - convert a '\0'-delimited string to full uppercase.
+void upcase(char *symbol) {
+    char *curr = symbol;
 
-    struct map_item *item = malloc(sizeof(struct map_item));
-    item->name = symbol;
-    item->binding = NULL;
-    
-    item = intern(item, package);
+    while (*curr != '\0') {
+        if (*curr >= 97 && *curr <= 122) {
+            *curr -= 32;
+        }
+
+        ++curr;
+    }
+}
+
+// read_symbol - read a '\0'-delimited string and add a null binding to the
+// environment.
+struct sexpr *read_symbol(char *input, struct env *e) {
+    char *symbol = copy_head_str(input);
+    upcase(symbol);
+
+    struct binding *b = add_null_binding(symbol, e);
 
     struct sexpr *result = malloc(sizeof(struct sexpr));
     result->type = SYMBOL;
-    result->symbol = item->name;
+    result->symbol = b->symbol;
 
     return result;
 }
@@ -110,12 +112,12 @@ char *tail_str(char *input) {
     return input;
 }
 
-struct sexpr *read_sexpr(char *input, struct map *package);
+struct sexpr *read_sexpr(char *input, struct env *environment);
 
 // read_pair - read a linked list from a string until the ending ')'.
 //
-// The begining '(' should NOT be included when calling read_pair.
-struct sexpr *read_pair(char *input, struct map *package) {
+// The beginning '(' should NOT be included when calling read_pair.
+struct sexpr *read_pair(char *input, struct env *environment) {
     while (*input == ' ') {
         ++input;
     }
@@ -125,10 +127,10 @@ struct sexpr *read_pair(char *input, struct map *package) {
     }
 
     char *head_str = copy_head_str(input);
-    struct sexpr *head = read_sexpr(head_str, package);
+    struct sexpr *head = read_sexpr(head_str, environment);
 
     char *tail_str_pos = tail_str(input);
-    struct sexpr *tail = read_pair(tail_str_pos, package);
+    struct sexpr *tail = read_pair(tail_str_pos, environment);
 
     struct sexpr *result = malloc(sizeof(struct sexpr));
     result->type = PAIR;
@@ -142,7 +144,8 @@ struct sexpr *read_pair(char *input, struct map *package) {
     return result;
 }
 
-struct sexpr *read_quotted(char *input, struct map *package) {
+// read_quoted - reader macro which maps 'symbol to (quote symbol)
+struct sexpr *read_quotted(char *input, struct env *environment) {
     char *quote_str = malloc(7 * sizeof(char));
     strcpy(quote_str, "QUOTE");
 
@@ -156,7 +159,7 @@ struct sexpr *read_quotted(char *input, struct map *package) {
     result->pair = malloc(sizeof(struct pair));
 
     struct pair *quotted_pair = malloc(sizeof(struct pair));
-    quotted_pair->head = read_sexpr(input, package);
+    quotted_pair->head = read_sexpr(input, environment);
     quotted_pair->tail = NULL;
 
     result->pair->head = quotted_sexpr;
@@ -166,7 +169,7 @@ struct sexpr *read_quotted(char *input, struct map *package) {
 }
 
 // read_sexpr - read an s-expression.
-struct sexpr *read_sexpr(char *input, struct map *package) {
+struct sexpr *read_sexpr(char *input, struct env *environment) {
     while (*input == ' ') {
         ++input;
     }
@@ -174,13 +177,13 @@ struct sexpr *read_sexpr(char *input, struct map *package) {
     if (*input == '(') {
         ++input;
 
-        return read_pair(input, package);
+        return read_pair(input, environment);
     } else if (*input == '\'') {
         ++input;
 
-        return read_quotted(input, package);
+        return read_quotted(input, environment);
     } else {
-        return read_symbol(input, package);
+        return read_symbol(input, environment);
     }
 }
 
