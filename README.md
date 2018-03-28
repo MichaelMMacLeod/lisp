@@ -16,6 +16,9 @@ Currently supports the following:
     - tail
 - eq (pointer equality)
 - defvar
+- lambda
+    - Introduces a new lexical scope. Lexical bindings can shadow global ones
+      defined with defvar.
 ```
 
 ```
@@ -34,4 +37,6 @@ B
 NIL
 > (eq 'hello a)
 T
+> ((lambda (a b) (list b a)) 'second 'first)
+(FIRST SECOND)
 ```
