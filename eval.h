@@ -2,8 +2,6 @@
 #define INCLUDE_EVAL_H
 
 #include "sexpr.h"
-#include "map.h"
-#include "package.h"
 
 int special_quote_p(struct sexpr *form) {
     char *nil_str = "QUOTE";
