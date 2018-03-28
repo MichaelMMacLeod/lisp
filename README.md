@@ -25,4 +25,8 @@ $ ./a.out
 A
 > (tail '(a b c))
 (B C)
+> (eq 'hello 'hello)
+T
+> (eq 'hello 'world)
+NIL
 ```
