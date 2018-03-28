@@ -82,6 +82,19 @@ int special_defvar_p(struct sexpr *form, struct env *environment) {
     exit(1);
 }
 
+int special_lambda_p(struct sexpr *form, struct env *environment) {
+    char *lambda_str = get_binding("LAMBDA", environment)->symbol;
+
+    if (form->type == SYMBOL) {
+        return 0;
+    } else if (form->type == PAIR) {
+        return strcmp(lambda_str, form->pair->head->pair->head->symbol) == 0;
+    }
+
+    printf("special_lambda_p - undefined form type\n");
+    exit(1);
+}
+
 int self_evaluating_p(struct sexpr *form, struct env *environment) {
     char *nil_str = get_binding("NIL", environment)->symbol;
 
@@ -152,6 +165,42 @@ struct sexpr *interpret_defvar(struct pair *arg, struct env *environment) {
     return result;
 }
 
+struct sexpr *interpret_lambda(struct pair *arg, struct env *environment) {
+    // ((lambda (a b c) (list a b c)) '1 '2 '3)
+    // arg->head->pair->head->symbol = LAMBDA
+    // arg->head->pair->tail->head->pair->head->symbol = A
+    // arg->head->pair->tail->tail->head->pair->head->symbol = LIST
+    // arg->tail->head->pair->head->symbol = QUOTE
+
+    struct env *new_environment = copy_env(environment);
+
+    int length = 0;
+    struct pair *curr = arg->head->pair->tail->head->pair;
+
+    while (curr != NULL) {
+        ++length;
+        curr = curr->tail;
+    }
+
+    struct pair *defvar_args = malloc(length * sizeof(struct pair));
+    struct pair *curr_defvar_arg = defvar_args;
+    struct pair *curr_lambda_binding = arg->head->pair->tail->head->pair;
+    struct pair *curr_lambda_application = arg->tail;
+
+    for (int i = 0; i < length; ++i) {
+        curr_defvar_arg->head = curr_lambda_binding->head;
+        curr_defvar_arg->tail = curr_lambda_application;
+
+        interpret_defvar(curr_defvar_arg, new_environment);
+
+        ++curr_defvar_arg;
+        curr_lambda_binding = curr_lambda_binding->tail;
+        curr_lambda_application = curr_lambda_application->tail;
+    }
+
+    return eval_sexpr(arg->head->pair->tail->tail->head, new_environment);
+}
+
 struct sexpr *eval_symbol(char *symbol, struct env *environment) {
     return get_binding(symbol, environment)->expression;
 }
@@ -179,6 +228,8 @@ struct sexpr *eval_sexpr(struct sexpr *form, struct env *environment) {
         return interpret_eq(form->pair->tail, environment);
     } else if (special_defvar_p(form, environment)) {
         return interpret_defvar(form->pair->tail, environment);
+    } else if (special_lambda_p(form, environment)) {
+        return interpret_lambda(form->pair, environment);
     } else if (self_evaluating_p(form, environment)) {
         return form;
     } else if (form->type == SYMBOL) {

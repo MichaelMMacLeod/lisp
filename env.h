@@ -99,6 +99,8 @@ struct env *create_default_env() {
     char *str_head = malloc(5 * sizeof(char));
     char *str_tail = malloc(5 * sizeof(char));
     char *str_eq = malloc(3 * sizeof(char));
+    char *str_defvar = malloc(7 * sizeof(char));
+    char *str_lambda = malloc(7 * sizeof(char));
 
     strcpy(str_nil, "NIL");
     strcpy(str_t, "T");
@@ -107,6 +109,8 @@ struct env *create_default_env() {
     strcpy(str_head, "HEAD");
     strcpy(str_tail, "TAIL");
     strcpy(str_eq, "EQ");
+    strcpy(str_defvar, "DEFVAR");
+    strcpy(str_lambda, "LAMBDA");
 
     struct env *e = malloc(sizeof(struct env));
     e->size = 0;
@@ -119,6 +123,8 @@ struct env *create_default_env() {
     add_null_binding(str_head, e);
     add_null_binding(str_tail, e);
     add_null_binding(str_eq, e);
+    add_null_binding(str_defvar, e);
+    add_null_binding(str_lambda, e);
 
     return e;
 }
