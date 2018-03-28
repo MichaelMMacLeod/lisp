@@ -57,6 +57,26 @@ struct binding *add_binding(struct binding *b, struct env *e) {
     }
 }
 
+// add_shadowing_binding - add_binding, except that it will shadow any existing
+// bindings.
+struct binding *add_shadowing_binding(struct binding *b, struct env *e) {
+    struct binding *to_be_shadowed = get_binding(b->symbol, e);
+
+    if (to_be_shadowed == NULL) {
+        ++e->size;
+
+        e->bindings = realloc(e->bindings, e->size * sizeof(struct binding));
+
+        e->bindings[e->size - 1] = *b;
+
+        return b;
+    } else {
+        to_be_shadowed->expression = b->expression;
+
+        return to_be_shadowed;
+    }
+}
+
 // add_null_binding - bind a symbol to a NULL expression, then add it to an
 // environment.
 //

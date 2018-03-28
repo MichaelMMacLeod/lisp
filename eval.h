@@ -69,6 +69,19 @@ int special_eq_p(struct sexpr *form, struct env *environment) {
     exit(1);
 }
 
+int special_defvar_p(struct sexpr *form, struct env *environment) {
+    char *defvar_str = get_binding("DEFVAR", environment)->symbol;
+
+    if (form->type == SYMBOL) {
+        return 0;
+    } else if (form->type == PAIR) {
+        return strcmp(defvar_str, form->pair->head->symbol) == 0;
+    }
+
+    printf("special_defvar_p - undefined form type\n");
+    exit(1);
+}
+
 int self_evaluating_p(struct sexpr *form, struct env *environment) {
     char *nil_str = get_binding("NIL", environment)->symbol;
 
@@ -127,6 +140,22 @@ struct sexpr *interpret_eq(struct pair *arg, struct env *environment) {
     return result;
 }
 
+struct sexpr *interpret_defvar(struct pair *arg, struct env *environment) {
+    struct binding *b = malloc(sizeof(struct binding));
+    b->symbol = arg->head->symbol;
+    b->expression = eval_sexpr(arg->tail->head, environment);
+
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = SYMBOL;
+    result->symbol = add_shadowing_binding(b, environment)->symbol;
+
+    return result;
+}
+
+struct sexpr *eval_symbol(char *symbol, struct env *environment) {
+    return get_binding(symbol, environment)->expression;
+}
+
 struct pair *eval_pair(struct pair *p, struct env *environment) {
     p->head = eval_sexpr(p->head, environment);
 
@@ -148,8 +177,12 @@ struct sexpr *eval_sexpr(struct sexpr *form, struct env *environment) {
         return interpret_tail(form->pair->tail, environment);
     } else if (special_eq_p(form, environment)) {
         return interpret_eq(form->pair->tail, environment);
+    } else if (special_defvar_p(form, environment)) {
+        return interpret_defvar(form->pair->tail, environment);
     } else if (self_evaluating_p(form, environment)) {
         return form;
+    } else if (form->type == SYMBOL) {
+        return eval_symbol(form->symbol, environment);
     }
 
     printf("eval_sexpr - undefined form\n");

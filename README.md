@@ -15,6 +15,7 @@ Currently supports the following:
     - head
     - tail
 - eq (pointer equality)
+- defvar
 ```
 
 ```
@@ -25,8 +26,12 @@ $ ./a.out
 A
 > (tail '(a b c))
 (B C)
-> (eq 'hello 'hello)
-T
-> (eq 'hello 'world)
+> (defvar a 'hello)
+A
+> (defvar b 'world)
+B
+> (eq a b)
 NIL
+> (eq 'hello a)
+T
 ```
