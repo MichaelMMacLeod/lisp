@@ -1,243 +1,235 @@
-#ifndef INCLUDE_EVAL_H
-#define INCLUDE_EVAL_H
+#ifndef EVAL_NEW_H
+#define EVAL_NEW_H
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "sexpr.h"
 #include "env.h"
 
-int special_quote_p(struct sexpr *form, struct env *environment) {
-    char *quote_str = get_binding("QUOTE", environment)->symbol;
+struct sexpr *eval_symbol(char *symbol, struct env *e);
+struct pair *eval_pair(struct pair *p, struct env *e);
+struct sexpr *eval_sexpr(struct sexpr *form, struct env *e);
 
-    if (form->type == SYMBOL) {
-        return 0;
-    } else if (form->type == PAIR) {
-        return strcmp(quote_str, form->pair->head->symbol) == 0;
-    }
-
-    printf("special_quote_p - undefined form type\n");
-    exit(1);
+// quote_p - true if the symbol is QUOTE
+int quote_p(char *symbol) {
+    return strcmp("QUOTE", symbol) == 0;
 }
 
-int special_list_p(struct sexpr *form, struct env *environment) {
-    char *list_str = get_binding("LIST", environment)->symbol;
-
-    if (form->type == SYMBOL) {
-        return 0;
-    } else if (form->type == PAIR) {
-        return strcmp(list_str, form->pair->head->symbol) == 0;
-    }
-
-    printf("special_list_p - undefined form type\n");
-    exit(1);
+// list_p - true if the symbol is LIST
+int list_p(char *symbol) {
+    return strcmp("LIST", symbol) == 0;
 }
 
-int special_head_p(struct sexpr *form, struct env *environment) {
-    char *head_str = get_binding("HEAD", environment)->symbol;
-
-    if (form->type == SYMBOL) {
-        return 0;
-    } else if (form->type == PAIR) {
-        return strcmp(head_str, form->pair->head->symbol) == 0;
-    }
-
-    printf("special_head_p - undefined form type\n");
-    exit(1);
+// head_p - true if the symbol is HEAD
+int head_p(char *symbol) {
+    return strcmp("HEAD", symbol) == 0;
 }
 
-int special_tail_p(struct sexpr *form, struct env *environment) {
-    char *tail_str = get_binding("TAIL", environment)->symbol;
-
-    if (form->type == SYMBOL) {
-        return 0;
-    } else if (form->type == PAIR) {
-        return strcmp(tail_str, form->pair->head->symbol) == 0;
-    }
-
-    printf("special_tail_p - undefined form type\n");
-    exit(1);
+// tail_p - true if the symbol is TAIL
+int tail_p(char *symbol) {
+    return strcmp("TAIL", symbol) == 0;
 }
 
-int special_eq_p(struct sexpr *form, struct env *environment) {
-    char *eq_str = get_binding("EQ", environment)->symbol;
-
-    if (form->type == SYMBOL) {
-        return 0;
-    } else if (form->type == PAIR) {
-        return strcmp(eq_str, form->pair->head->symbol) == 0;
-    }
-
-    printf("special_eq_p - undefined form type\n");
-    exit(1);
+// eq_p - true if the symbol is EQ
+int eq_p(char *symbol) {
+    return strcmp("EQ", symbol) == 0;
 }
 
-int special_defvar_p(struct sexpr *form, struct env *environment) {
-    char *defvar_str = get_binding("DEFVAR", environment)->symbol;
-
-    if (form->type == SYMBOL) {
-        return 0;
-    } else if (form->type == PAIR) {
-        return strcmp(defvar_str, form->pair->head->symbol) == 0;
-    }
-
-    printf("special_defvar_p - undefined form type\n");
-    exit(1);
+// defvar_p - true if the symbol is DEFVAR
+int defvar_p(char *symbol) {
+    return strcmp("DEFVAR", symbol) == 0;
 }
 
-int special_lambda_p(struct sexpr *form, struct env *environment) {
-    char *lambda_str = get_binding("LAMBDA", environment)->symbol;
-
-    if (form->type == SYMBOL) {
-        return 0;
-    } else if (form->type == PAIR) {
-        return strcmp(lambda_str, form->pair->head->pair->head->symbol) == 0;
-    }
-
-    printf("special_lambda_p - undefined form type\n");
-    exit(1);
+// lambda_p - true if the symbol is LAMBDA
+int lambda_p(char *symbol) {
+    return strcmp("LAMBDA", symbol) == 0;
 }
 
-int self_evaluating_p(struct sexpr *form, struct env *environment) {
-    char *nil_str = get_binding("NIL", environment)->symbol;
+// interpret_quote - return the argument unevaluated
+struct sexpr *interpret_quote(struct pair *args, struct env *e) {
+    return args->head;
+}
 
-    if (form->type == SYMBOL) {
-        if (strcmp(nil_str, form->symbol) == 0) {
-            return 1;
+// interpret_list - evaluate each argument and place them in a list
+struct sexpr *interpret_list(struct pair *args, struct env *e) {
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = PAIR;
+    result->pair = eval_pair(args, e);
+
+    return result;
+}
+
+// interpret_head - evaluate the list, then return its head
+struct sexpr *interpret_head(struct pair *args, struct env *e) {
+    return eval_sexpr(args->head, e)->pair->head;
+}
+
+// interpret_tail - evaluate the list, then return its tail
+struct sexpr *interpret_tail(struct pair *args, struct env *e) {
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = PAIR;
+    result->pair = eval_sexpr(args->head, e)->pair->tail;
+
+    return result;
+}
+
+// interpret_eq - evaluate the arguments. T if they are equal, NIL otherwise
+struct sexpr *interpret_eq(struct pair *args, struct env *e) {
+    args = eval_pair(args, e);
+
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = SYMBOL;
+
+    if (args->head->type == SYMBOL && args->tail->head->type == SYMBOL
+            && args->head->symbol == args->tail->head->symbol) {
+        result->symbol = get_binding("T", e)->symbol;
+    } else {
+        result->symbol = get_binding("NIL", e)->symbol;
+    }
+
+    return result;
+}
+
+// interpret_defvar - bind a symbol to an evaluated expression, add to env
+struct sexpr *interpret_defvar(struct pair *args, struct env *e) {
+    struct binding *b = malloc(sizeof(struct binding));
+    b->symbol = args->head->symbol;
+    b->expression = eval_sexpr(args->tail->head, e);
+
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = SYMBOL;
+    result->symbol = add_shadowing_binding(b, e)->symbol;
+
+    return result;
+}
+
+// interpret_lambda - create a lambda expression
+struct sexpr *interpret_lambda(struct pair *args, struct env *e) {
+    struct function *f = malloc(sizeof(struct function));
+
+    if (args->head != NULL) {
+        f->args = args->head->pair;
+    } else {
+        f->args = NULL;
+    }
+
+    f->body = args->tail->head;
+
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = FUNCTION;
+    result->function = f;
+
+    return result;
+}
+
+// create_function_env - copy an environment and introduce function arg bindings
+struct env *create_function_env(struct pair *lambda_bindings, 
+                                struct pair *args, 
+                                struct env *e) {
+    struct env *function_env = copy_env(e);
+
+    int n_lambda_bindings = 0;
+    struct pair *curr_lambda_binding = lambda_bindings;
+
+    while (curr_lambda_binding != NULL) {
+        ++n_lambda_bindings;
+        curr_lambda_binding = curr_lambda_binding->tail;
+    }
+
+    curr_lambda_binding = lambda_bindings;
+    struct pair *curr_arg = args;
+
+    for (int i = 0; i < n_lambda_bindings; ++i) {
+        struct binding *b = malloc(sizeof(struct binding));
+        b->symbol = curr_lambda_binding->head->symbol;
+        b->expression = eval_sexpr(curr_arg->head, e);
+
+        add_shadowing_binding(b, function_env);
+
+        curr_lambda_binding = curr_lambda_binding->tail;
+        curr_arg = curr_arg->tail;
+    }
+
+    return function_env;
+}
+
+// eval_function - evaluate a function
+struct sexpr *eval_function(struct function *f, struct pair *args, struct env *e) {
+    struct env *function_env = create_function_env(f->args, args, e);
+
+    return eval_sexpr(f->body, function_env);
+}
+
+// eval_symbol - evaluate a symbol
+struct sexpr *eval_symbol(char *symbol, struct env *e) {
+    if (symbol_string_eq("NIL", symbol)) {
+        struct sexpr *result = malloc(sizeof(struct sexpr));
+        result->type = SYMBOL;
+        result->symbol = symbol;
+
+        return result;
+    } else {
+        struct binding *b = get_binding(symbol, e);
+
+        if (b != NULL) {
+            return b->expression;
+        } else {
+            printf("[eval_symbol] - unbound symbol\n");
+            exit(1);
         }
     }
-
-    return 0;
 }
 
-struct sexpr *interpret_quote(struct pair *arg, struct env *environment) {
-    return arg->head;
-}
-
-struct pair *eval_pair(struct pair *p, struct env *environment);
-
-struct sexpr *interpret_list(struct pair *arg, struct env *environment) {
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = PAIR;
-    result->pair = eval_pair(arg, environment);
-
-    return result;
-}
-
-struct sexpr *eval_sexpr(struct sexpr *form, struct env *environment);
-
-struct sexpr *interpret_head(struct pair *arg, struct env *environment) {
-    return eval_sexpr(arg->head, environment)->pair->head;
-}
-
-struct sexpr *interpret_tail(struct pair *arg, struct env *environment) {
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = PAIR;
-    result->pair = eval_sexpr(arg->head, environment)->pair->tail;
-
-    return result;
-}
-
-struct sexpr *interpret_eq(struct pair *arg, struct env *environment) {
-    arg = eval_pair(arg, environment);
-
-    char *t_str = get_binding("T", environment)->symbol;
-    char *nil_str = get_binding("NIL", environment)->symbol;
-
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = SYMBOL;
-    result->symbol = nil_str;
-
-    if (arg->head->type == SYMBOL && arg->tail->head->type == SYMBOL
-            && arg->head->symbol == arg->tail->head->symbol) {
-        result->symbol = t_str;
-    }
-
-    return result;
-}
-
-struct sexpr *interpret_defvar(struct pair *arg, struct env *environment) {
-    struct binding *b = malloc(sizeof(struct binding));
-    b->symbol = arg->head->symbol;
-    b->expression = eval_sexpr(arg->tail->head, environment);
-
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = SYMBOL;
-    result->symbol = add_shadowing_binding(b, environment)->symbol;
-
-    return result;
-}
-
-struct sexpr *interpret_lambda(struct pair *arg, struct env *environment) {
-    // ((lambda (a b c) (list a b c)) '1 '2 '3)
-    // arg->head->pair->head->symbol = LAMBDA
-    // arg->head->pair->tail->head->pair->head->symbol = A
-    // arg->head->pair->tail->tail->head->pair->head->symbol = LIST
-    // arg->tail->head->pair->head->symbol = QUOTE
-
-    struct env *new_environment = copy_env(environment);
-
-    int length = 0;
-    struct pair *curr = arg->head->pair->tail->head->pair;
-
-    while (curr != NULL) {
-        ++length;
-        curr = curr->tail;
-    }
-
-    struct pair *defvar_args = malloc(length * sizeof(struct pair));
-    struct pair *curr_defvar_arg = defvar_args;
-    struct pair *curr_lambda_binding = arg->head->pair->tail->head->pair;
-    struct pair *curr_lambda_application = arg->tail;
-
-    for (int i = 0; i < length; ++i) {
-        curr_defvar_arg->head = curr_lambda_binding->head;
-        curr_defvar_arg->tail = curr_lambda_application;
-
-        interpret_defvar(curr_defvar_arg, new_environment);
-
-        ++curr_defvar_arg;
-        curr_lambda_binding = curr_lambda_binding->tail;
-        curr_lambda_application = curr_lambda_application->tail;
-    }
-
-    return eval_sexpr(arg->head->pair->tail->tail->head, new_environment);
-}
-
-struct sexpr *eval_symbol(char *symbol, struct env *environment) {
-    return get_binding(symbol, environment)->expression;
-}
-
-struct pair *eval_pair(struct pair *p, struct env *environment) {
-    p->head = eval_sexpr(p->head, environment);
+// eval_pair - evaluate a pair
+struct pair *eval_pair(struct pair *p, struct env *e) {
+    struct pair *result = malloc(sizeof(struct pair));
+    result->head = eval_sexpr(p->head, e);
 
     if (p->tail != NULL) {
-        p->tail = eval_pair(p->tail, environment);
+        result->tail = eval_pair(p->tail, e);
     }
 
-    return p;
+    return result;
 }
 
-struct sexpr *eval_sexpr(struct sexpr *form, struct env *environment) {
-    if (special_quote_p(form, environment)) {
-        return interpret_quote(form->pair->tail, environment);
-    } else if (special_list_p(form, environment)) {
-        return interpret_list(form->pair->tail, environment);
-    } else if (special_head_p(form, environment)) {
-        return interpret_head(form->pair->tail, environment);
-    } else if (special_tail_p(form, environment)) {
-        return interpret_tail(form->pair->tail, environment);
-    } else if (special_eq_p(form, environment)) {
-        return interpret_eq(form->pair->tail, environment);
-    } else if (special_defvar_p(form, environment)) {
-        return interpret_defvar(form->pair->tail, environment);
-    } else if (special_lambda_p(form, environment)) {
-        return interpret_lambda(form->pair, environment);
-    } else if (self_evaluating_p(form, environment)) {
-        return form;
-    } else if (form->type == SYMBOL) {
-        return eval_symbol(form->symbol, environment);
-    }
+// eval_sexpr - evaluate a sexpr
+struct sexpr *eval_sexpr(struct sexpr *form, struct env *e) {
+    if (form->type == SYMBOL) {
+        return eval_symbol(form->symbol, e);
+    } else if (form->type == PAIR) {
+        if (quote_p(form->pair->head->symbol)) {
+            return interpret_quote(form->pair->tail, e);
+        } else if (list_p(form->pair->head->symbol)) {
+            return interpret_list(form->pair->tail, e);
+        } else if (head_p(form->pair->head->symbol)) {
+            return interpret_head(form->pair->tail, e);
+        } else if (tail_p(form->pair->head->symbol)) {
+            return interpret_tail(form->pair->tail, e);
+        } else if (eq_p(form->pair->head->symbol)) {
+            return interpret_eq(form->pair->tail, e);
+        } else if (defvar_p(form->pair->head->symbol)) {
+            return interpret_defvar(form->pair->tail, e);
+        } else if (lambda_p(form->pair->head->symbol)) {
+            return interpret_lambda(form->pair->tail, e);
+        } else if (form->pair->head->type == FUNCTION) {
+            return eval_function(form->pair->head->function, form->pair->tail, e);
+        } else {
+            struct sexpr *result = malloc(sizeof(struct sexpr));
+            result->type = PAIR;
+            result->pair = form->pair;
 
-    printf("eval_sexpr - undefined form\n");
-    exit(1);
+            result->pair->head = eval_sexpr(result->pair->head, e);
+
+            return eval_sexpr(result, e);
+        }
+    } else if (form->type == FUNCTION) {
+        printf("[eval_sexpr] - unbound symbol\n");
+        exit(1);
+    } else {
+        printf("[eval_sexpr] - undefined sexpr type\n");
+        exit(1);
+    }
 }
 
 #endif
