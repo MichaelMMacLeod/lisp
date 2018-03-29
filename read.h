@@ -50,19 +50,13 @@ char *symbol_reader(char curr, FILE *stream, struct env *e) {
 }
 
 struct pair *list_reader(char curr, FILE *stream, struct env *e) {
-    while (curr == ' ' || curr == '\n' || curr == '\t') {
-        curr = get_char(stream);
-    }
-    
     if (curr == ')' || peek_char(stream) == ')') {
         return NULL;
     }
 
-    curr = get_char(stream);
-
     struct pair *result = malloc(sizeof(struct pair));
 
-    result->head = sexpr_reader(curr, stream, e);
+    result->head = sexpr_reader(get_char(stream), stream, e);
     result->tail = list_reader(get_char(stream), stream, e);
 
     return result;

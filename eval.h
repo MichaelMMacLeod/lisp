@@ -188,6 +188,8 @@ struct pair *eval_pair(struct pair *p, struct env *e) {
 
     if (p->tail != NULL) {
         result->tail = eval_pair(p->tail, e);
+    } else {
+        result->tail = NULL;
     }
 
     return result;
