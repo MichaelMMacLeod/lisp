@@ -6,6 +6,7 @@
 #include "sexpr.h"
 #include "env.h"
 #include "stream.h"
+#include "print.h"
 
 // upcase - convert a '\0'-delimited string to full uppercase.
 void upcase(char *symbol) {
@@ -50,14 +51,19 @@ char *symbol_reader(char curr, FILE *stream, struct env *e) {
 }
 
 struct pair *list_reader(char curr, FILE *stream, struct env *e) {
-    if (curr == ')' || peek_char(stream) == ')') {
+    if (curr == ')' /*|| peek_char(stream) == ')'*/) {
         return NULL;
     }
 
     struct pair *result = malloc(sizeof(struct pair));
 
-    result->head = sexpr_reader(get_char(stream), stream, e);
-    result->tail = list_reader(get_char(stream), stream, e);
+    if (peek_char(stream) == ')') {
+        result->head = NULL;
+        result->tail = list_reader(get_char(stream), stream, e);
+    } else {
+        result->head = sexpr_reader(get_char(stream), stream, e);
+        result->tail = list_reader(get_char(stream), stream, e);
+    }
 
     return result;
 }

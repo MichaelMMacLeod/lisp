@@ -108,13 +108,17 @@ struct sexpr *interpret_defvar(struct pair *args, struct env *e) {
 struct sexpr *interpret_lambda(struct pair *args, struct env *e) {
     struct function *f = malloc(sizeof(struct function));
 
-    if (args->head != NULL) {
+    if (args->head->pair != NULL) {
         f->args = args->head->pair;
     } else {
         f->args = NULL;
     }
 
-    f->body = args->tail->head;
+    if (args->tail != NULL) {
+        f->body = args->tail->head;
+    } else {
+        f->body = NULL;
+    }
 
     struct sexpr *result = malloc(sizeof(struct sexpr));
     result->type = FUNCTION;
@@ -132,7 +136,8 @@ struct env *create_function_env(struct pair *lambda_bindings,
     int n_lambda_bindings = 0;
     struct pair *curr_lambda_binding = lambda_bindings;
 
-    while (curr_lambda_binding != NULL) {
+    while (curr_lambda_binding != NULL
+            && curr_lambda_binding->head != NULL) {
         ++n_lambda_bindings;
         curr_lambda_binding = curr_lambda_binding->tail;
     }
