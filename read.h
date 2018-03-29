@@ -1,52 +1,11 @@
 #ifndef INCLUDE_READ_H
 #define INCLUDE_READ_H
 
+#include <stdlib.h>
 #include <string.h>
 #include "sexpr.h"
 #include "env.h"
-
-// copy_head_str - create a '\0' delimited string out of the next valid
-// sexpr.
-//
-// The result points to a copy of a portion of the input.
-char *copy_head_str(char *input) {
-    char *p = input;
-
-    int size = 0;
-
-    int n_open = 0;
-
-    while (1) {
-        if ((*p == ' ' || *p == ')' || *p == '\0') && n_open == 0) {
-            break;
-        }
-
-        if (*p == '(') {
-            ++n_open;
-        } else if (*p == ')') {
-            --n_open;
-        }
-
-        ++size;
-        ++p;
-    }
-
-    char *result = malloc(size * sizeof(char));
-    char *r = result;
-
-    p = input;
-
-    for (int i = 0; i < size; ++i) {
-        *r = *p;
-        
-        ++r;
-        ++p;
-    }
-
-    *r = '\0';
-
-    return result;
-}
+#include "stream.h"
 
 // upcase - convert a '\0'-delimited string to full uppercase.
 void upcase(char *symbol) {
@@ -61,130 +20,70 @@ void upcase(char *symbol) {
     }
 }
 
-// read_symbol - read a '\0'-delimited string and add a null binding to the
-// environment.
-struct sexpr *read_symbol(char *input, struct env *e) {
-    char *symbol = copy_head_str(input);
-    upcase(symbol);
+struct sexpr *sexpr_reader(char curr, FILE *stream, struct env *e);
 
-    struct binding *b = add_null_binding(symbol, e);
+char *symbol_reader(char curr, FILE *stream, struct env *e) {
+    int length = 2;
 
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = SYMBOL;
-    result->symbol = b->symbol;
-
-    return result;
-}
-
-// cons - construct a linked list.
-struct pair *cons(struct sexpr *head, struct pair *tail) {
-    struct pair *result = malloc(sizeof(struct pair));
-
-    result->head = head;
-    result->tail = tail;
-
-    return result;
-}
-
-// tail_str - the tail of the current pair string.
-//
-// The result is part of the same input string - not a copy.
-//
-// The result is the location of the ' ' or ')' following the first sexpr,
-// meaning that to read the second sexpr, you need to disregard any spaces.
-char *tail_str(char *input) {
-    int n_open = 0;
+    char *symbol = malloc(length * sizeof(char));
+    symbol[0] = curr;
 
     while (1) {
-        if ((*input == ' ' || *input == ')') && n_open == 0) {
+        curr = peek_char(stream);
+
+        if (curr == ' ' || curr == '\n' || curr == '\t' || curr == ')') {
             break;
         }
 
-        if (*input == '(') {
-            ++n_open;
-        } else if (*input == ')') {
-            --n_open;
-        }
+        ++length;
+        symbol = realloc(symbol, length * sizeof(char));
+        symbol[length - 2] = curr;
 
-        ++input;
+        get_char(stream);
     }
 
-    return input;
+    symbol[length - 1] = '\0';
+
+    upcase(symbol);
+
+    return add_null_binding(symbol, e)->symbol;
 }
 
-struct sexpr *read_sexpr(char *input, struct env *environment);
-
-// read_pair - read a linked list from a string until the ending ')'.
-//
-// The beginning '(' should NOT be included when calling read_pair.
-struct sexpr *read_pair(char *input, struct env *environment) {
-    while (*input == ' ') {
-        ++input;
+struct pair *list_reader(char curr, FILE *stream, struct env *e) {
+    while (curr == ' ' || curr == '\n' || curr == '\t') {
+        curr = get_char(stream);
     }
-
-    if (*input == ')') {
+    
+    if (curr == ')' || peek_char(stream) == ')') {
         return NULL;
     }
 
-    char *head_str = copy_head_str(input);
-    struct sexpr *head = read_sexpr(head_str, environment);
+    curr = get_char(stream);
 
-    char *tail_str_pos = tail_str(input);
-    struct sexpr *tail = read_pair(tail_str_pos, environment);
+    struct pair *result = malloc(sizeof(struct pair));
 
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = PAIR;
-
-    if (tail == NULL) {
-        result->pair = cons(head, NULL);
-    } else {
-        result->pair = cons(head, tail->pair);
-    }
+    result->head = sexpr_reader(curr, stream, e);
+    result->tail = list_reader(get_char(stream), stream, e);
 
     return result;
 }
 
-// read_quoted - reader macro which maps 'symbol to (quote symbol)
-struct sexpr *read_quotted(char *input, struct env *environment) {
-    char *quote_str = malloc(7 * sizeof(char));
-    strcpy(quote_str, "QUOTE");
-
-    struct sexpr *quotted_sexpr = malloc(sizeof(struct sexpr));
-    quotted_sexpr->type = SYMBOL;
-    quotted_sexpr->symbol = quote_str;
+struct sexpr *sexpr_reader(char curr, FILE *stream, struct env *e) {
+    while (curr == ' ' || curr == '\n' || curr == '\t') {
+        curr = get_char(stream);
+    }
 
     struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = PAIR;
 
-    result->pair = malloc(sizeof(struct pair));
-
-    struct pair *quotted_pair = malloc(sizeof(struct pair));
-    quotted_pair->head = read_sexpr(input, environment);
-    quotted_pair->tail = NULL;
-
-    result->pair->head = quotted_sexpr;
-    result->pair->tail = quotted_pair;
-
-    return result;
-}
-
-// read_sexpr - read an s-expression.
-struct sexpr *read_sexpr(char *input, struct env *environment) {
-    while (*input == ' ') {
-        ++input;
-    }
-
-    if (*input == '(') {
-        ++input;
-
-        return read_pair(input, environment);
-    } else if (*input == '\'') {
-        ++input;
-
-        return read_quotted(input, environment);
+    if (curr == '(') {
+        result->type = PAIR;
+        result->pair = list_reader(curr, stream, e);
     } else {
-        return read_symbol(input, environment);
+        result->type = SYMBOL;
+        result->symbol = symbol_reader(curr, stream, e);
     }
+    
+    return result;
 }
 
 #endif
