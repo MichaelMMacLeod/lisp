@@ -7,37 +7,40 @@ $ gcc main.c
 ### Usage
 
 ```
-- quote 
-    > (quote hello-world)
-    HELLO-WORLD
-    > 'reader-macro-also
-    READER-MACRO-ALSO
-- list
-    > (list 'a 'b 'c)
-    (A B C)
-- head 
-    > (head '(a b c))
-    A
-- tail
-    > (tail '(a b c))
-    (B C)
-- eq
-    > (eq 'hello 'hello)
-    T
-    > (eq 'hello 'world)
-    NIL
-- lambda
-    > ((lambda (a b) (list b a)) 'first 'second)
-    (SECOND FIRST)
-- defvar
-    > (defvar my-var 'hello-world)
-    MY-VAR
-    > (defvar get-my-var (lambda () my-var))
-    GET-MY-VAR
-    > (get-my-var)
-    HELLO-WORLD
-    > (defvar my-var 'hi-there)
-    MY-VAR
-    > (get-my-var)
-    HI-THERE
+- QUOTE
+    - (quote arg)
+    - with a reader macro:
+        - 'arg
+- LIST
+    - (list args ...)
+- HEAD
+    - (head list-form)
+- TAIL
+    - (tail list-form)
+- EQ
+    - (eq symbol1 symbol2)
+- DEFVAR
+    - (defvar symbol-name form)
+- LAMBDA
+    - (lambda (args ...) body-form)
+    - can be used with defvar to create named functions:
+        - (defvar symbol-name (lambda (args ...) body-form))
+- CREATE-MAP
+    - (create-map)
+- GET
+    - (get symbol map)
+- SET
+    - (set (get symbol map) new-value map)
+- READ
+    - read from standard input:
+        - (read)
+    - read from string:
+        - (read "a string")
+- EVAL
+    - (eval form)
+- LOOP
+    - infinite loop:
+        - (loop form)
+- PRINT
+    - (print form)
 ```
