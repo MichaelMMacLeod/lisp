@@ -66,7 +66,6 @@ struct item *get(char *key, struct map *m) {
 struct item *add_without_shadowing(struct item *i, struct map *m) {
     struct item *possible_duplicate = get(i->key, m);
 
-//    if (possible_duplicate == NULL) {
     if (!exists(possible_duplicate, m)) {
         ++m->size;
 
@@ -86,7 +85,6 @@ struct item *add(struct item *i, struct map *m) {
     struct item *possible_duplicate = get(i->key, m);
 
     if (!exists(possible_duplicate, m)) {
-//    if (possible_duplicate == NULL) {
         ++m->size;
 
         m->items = realloc(m->items, m->size * sizeof(struct item));
