@@ -51,7 +51,7 @@ char *symbol_reader(char curr, FILE *stream, struct env *e) {
 }
 
 struct pair *list_reader(char curr, FILE *stream, struct env *e) {
-    if (curr == ')' /*|| peek_char(stream) == ')'*/) {
+    if (curr == ')') {
         return NULL;
     }
 
@@ -68,6 +68,29 @@ struct pair *list_reader(char curr, FILE *stream, struct env *e) {
     return result;
 }
 
+struct sexpr *quote_reader(char curr, FILE *stream, struct env *e) {
+    struct sexpr *quotted_sexpr = sexpr_reader(get_char(stream), stream, e);
+
+    struct pair *nil_tail_pair = malloc(sizeof(struct pair));
+    nil_tail_pair->head = quotted_sexpr;
+    nil_tail_pair->tail = NULL;
+
+    char *quote = get_binding("QUOTE", e)->symbol;
+    struct sexpr *quote_sexpr = malloc(sizeof(struct sexpr));
+    quote_sexpr->type = SYMBOL;
+    quote_sexpr->symbol = quote;
+
+    struct pair *quote_pair = malloc(sizeof(struct pair));
+    quote_pair->head = quote_sexpr;
+    quote_pair->tail = nil_tail_pair;
+
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = PAIR;
+    result->pair = quote_pair;
+    
+    return result;
+}
+
 struct sexpr *sexpr_reader(char curr, FILE *stream, struct env *e) {
     while (curr == ' ' || curr == '\n' || curr == '\t') {
         curr = get_char(stream);
@@ -78,6 +101,8 @@ struct sexpr *sexpr_reader(char curr, FILE *stream, struct env *e) {
     if (curr == '(') {
         result->type = PAIR;
         result->pair = list_reader(curr, stream, e);
+    } else if (curr == '\'') {
+        return quote_reader(curr, stream, e);
     } else {
         result->type = SYMBOL;
         result->symbol = symbol_reader(curr, stream, e);
