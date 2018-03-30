@@ -10,80 +10,26 @@
 #include "stream.h"
 #include "read.h"
 #include "print.h"
+#include "c_macros.h"
 
 struct sexpr *eval_symbol(char *symbol, struct map *m);
 struct pair *eval_pair(struct pair *p, struct map *m);
 struct sexpr *eval_sexpr(struct sexpr *form, struct map *m);
 
-// quote_p - true if the symbol is QUOTE
-int quote_p(char *symbol) {
-    return strcmp("QUOTE", symbol) == 0;
-}
-
-// list_p - true if the symbol is LIST
-int list_p(char *symbol) {
-    return strcmp("LIST", symbol) == 0;
-}
-
-// head_p - true if the symbol is HEAD
-int head_p(char *symbol) {
-    return strcmp("HEAD", symbol) == 0;
-}
-
-// tail_p - true if the symbol is TAIL
-int tail_p(char *symbol) {
-    return strcmp("TAIL", symbol) == 0;
-}
-
-// eq_p - true if the symbol is EQ
-int eq_p(char *symbol) {
-    return strcmp("EQ", symbol) == 0;
-}
-
-// defvar_p - true if the symbol is DEFVAR
-int defvar_p(char *symbol) {
-    return strcmp("DEFVAR", symbol) == 0;
-}
-
-// lambda_p - true if the symbol is LAMBDA
-int lambda_p(char *symbol) {
-    return strcmp("LAMBDA", symbol) == 0;
-}
-
-// create_map_p - true if the symbol is CREATE-MAP
-int create_map_p(char *symbol) {
-    return strcmp("CREATE-MAP", symbol) == 0;
-}
-
-// set_p - true if the symbol is SET
-int set_p(char *symbol) {
-    return strcmp("SET", symbol) == 0;
-}
-
-// get_p - true if the symbol is GET
-int get_p(char *symbol) {
-    return strcmp("GET", symbol) == 0;
-}
-
-// read_p - true if the symbol is READ
-int read_p(char *symbol) {
-    return strcmp("READ", symbol) == 0;
-}
-
-// eval_p - true if the symbol is EVAL
-int eval_p(char *symbol) {
-    return strcmp("EVAL", symbol) == 0;
-}
-
-// loop_p - true if the symbol is LOOP
-int loop_p(char *symbol) {
-    return strcmp("LOOP", symbol) == 0;
-}
-
-// print_p - true if the symbol is PRINT
-int print_p(char *symbol) {
-    return strcmp("PRINT", symbol) == 0;
-}
+MAKE_P(quote, QUOTE);
+MAKE_P(list, LIST);
+MAKE_P(head, HEAD);
+MAKE_P(tail, TAIL);
+MAKE_P(eq, EQ);
+MAKE_P(defvar, DEFVAR);
+MAKE_P(lambda, LAMBDA);
+MAKE_P(create_map, CREATE-MAP);
+MAKE_P(set, SET);
+MAKE_P(get, GET);
+MAKE_P(read, READ);
+MAKE_P(eval, EVAL);
+MAKE_P(loop, LOOP);
+MAKE_P(print, PRINT);
 
 // interpret_quote - return the argument unevaluated
 struct sexpr *interpret_quote(struct pair *args, struct map *m) {
