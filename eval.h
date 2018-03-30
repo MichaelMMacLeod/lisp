@@ -31,11 +31,6 @@ MAKE_P(eval, EVAL);
 MAKE_P(loop, LOOP);
 MAKE_P(print, PRINT);
 
-// interpret_quote - return the argument unevaluated
-struct sexpr *interpret_quote(struct pair *args, struct map *m) {
-    return args->head;
-}
-
 // interpret_list - evaluate each argument and place them in a list
 struct sexpr *interpret_list(struct pair *args, struct map *m) {
     struct sexpr *result = malloc(sizeof(struct sexpr));

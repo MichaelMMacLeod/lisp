@@ -9,6 +9,7 @@
 #include "env.h"
 #include "stream.h"
 #include "print.h"
+#include "quote.h"
 
 // upcase - convert a '\0'-delimited string to full uppercase.
 void upcase(char *symbol) {
@@ -99,29 +100,6 @@ struct sexpr *string_reader(char curr, struct stream *s, struct map *m) {
     return result;
 }
 
-struct sexpr *quote_reader(char curr, struct stream *s, struct map *m) {
-    struct sexpr *quotted_sexpr = sexpr_reader(get_char(s), s, m);
-
-    struct pair *nil_tail_pair = malloc(sizeof(struct pair));
-    nil_tail_pair->head = quotted_sexpr;
-    nil_tail_pair->tail = NULL;
-
-    char *quote = get("QUOTE", m)->key;
-    struct sexpr *quote_sexpr = malloc(sizeof(struct sexpr));
-    quote_sexpr->type = SYMBOL;
-    quote_sexpr->symbol = quote;
-
-    struct pair *quote_pair = malloc(sizeof(struct pair));
-    quote_pair->head = quote_sexpr;
-    quote_pair->tail = nil_tail_pair;
-
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = PAIR;
-    result->pair = quote_pair;
-    
-    return result;
-}
-
 struct sexpr *sexpr_reader(char curr, struct stream *s, struct map *m) {
     while (curr == ' ' || curr == '\n' || curr == '\t') {
         curr = get_char(s);
@@ -133,7 +111,7 @@ struct sexpr *sexpr_reader(char curr, struct stream *s, struct map *m) {
         result->type = PAIR;
         result->pair = list_reader(curr, s, m);
     } else if (curr == '\'') {
-        return quote_reader(curr, s, m);
+        return single_quote_reader(curr, s, m);
     } else if (curr == '"') {
         return string_reader(curr, s, m);
     } else {
