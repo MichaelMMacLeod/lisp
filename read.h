@@ -34,7 +34,7 @@ char *symbol_reader(char curr, struct stream *s, struct map *m) {
     while (1) {
         curr = peek_char(s);
 
-        if (curr == ' ' || curr == '\n' || curr == '\t' || curr == ')') {
+        if (curr == ' ' || curr == '\n' || curr == '\t' || curr == ')' || curr == '\0') {
             break;
         }
 
@@ -77,7 +77,7 @@ struct sexpr *string_reader(char curr, struct stream *s, struct map *m) {
     while (1) {
         curr = peek_char(s);
 
-        if (curr == '"') {
+        if (curr == '"' || curr == '\0') {
             break;
         }
 

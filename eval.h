@@ -69,6 +69,11 @@ int read_p(char *symbol) {
     return strcmp("READ", symbol) == 0;
 }
 
+// eval_p - true if the symbol is EVAL
+int eval_p(char *symbol) {
+    return strcmp("EVAL", symbol) == 0;
+}
+
 // interpret_quote - return the argument unevaluated
 struct sexpr *interpret_quote(struct pair *args, struct map *m) {
     return args->head;
@@ -186,10 +191,19 @@ struct sexpr *interpret_get(struct pair *args, struct map *m) {
 struct sexpr *interpret_read(struct pair *args, struct map *m) {
     struct stream *s = malloc(sizeof(struct stream));
     
-    s->type = STRING_STREAM;
-    s->string_stream = args->head->string;
+    if (args == NULL) {
+        s->type = STREAM;
+        s->stream = stdin;
+    } else {
+        s->type = STRING_STREAM;
+        s->string_stream = args->head->string;
+    }
 
     return sexpr_reader(get_char(s), s, m);
+}
+
+struct sexpr *interpret_eval(struct pair *args, struct map *m) {
+    return eval_sexpr(eval_sexpr(args->head, m), m);
 }
 
 // create_function_env - copy an environment and introduce function arg bindings
@@ -293,6 +307,8 @@ struct sexpr *eval_sexpr(struct sexpr *form, struct map *m) {
             return interpret_get(form->pair->tail, m);
         } else if (read_p(form->pair->head->symbol)) {
             return interpret_read(form->pair->tail, m);
+        } else if (eval_p(form->pair->head->symbol)) {
+            return interpret_eval(form->pair->tail, m);
         } else if (form->pair->head->type == FUNCTION) {
             return eval_function(form->pair->head->function, form->pair->tail, m);
         } else {
