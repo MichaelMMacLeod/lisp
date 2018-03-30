@@ -8,7 +8,7 @@
 #include "stream.h"
 
 int main() {
-    struct env *environment = create_default_env();
+    struct map *environment = create_default_environment();
 
     while (1) {
         printf("> ");

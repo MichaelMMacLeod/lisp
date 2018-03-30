@@ -43,11 +43,11 @@ struct item *get(char *key, struct map *m) {
     return NULL;
 }
 
-// add_non_shadowing - add an item to a map but don't shadow an existing one if
-// it exists
+// add_non_shadowing - add an item to a map but don't shadow a duplicate if it
+// exists
 //
 // return - the new item, or, if it was a duplicate, the original
-struct item *add_non_shadowing(struct item *i, struct map *m) {
+struct item *add_without_shadowing(struct item *i, struct map *m) {
     struct item *possible_duplicate = get(i->key, m);
 
     if (possible_duplicate == NULL) {
@@ -62,10 +62,10 @@ struct item *add_non_shadowing(struct item *i, struct map *m) {
     }
 }
 
-// add_shadowing - add an item to a map and shadow an existing one if it exists
+// add - add an item to a map and shadow a duplicate if it exists
 //
 // return - the new item
-struct item *add_shadowing(struct item *i, struct map *m) {
+struct item *add(struct item *i, struct map *m) {
     struct item *possible_duplicate = get(i->key, m);
 
     if (possible_duplicate == NULL) {
@@ -102,6 +102,24 @@ struct item *remove_item(struct item *i, struct map *m) {
     }
 
     return NULL;
+}
+
+// copy - shallow copy a map
+//
+// return - the copy, which retains the same underlying key and value pointers
+struct map *copy(struct map *m) {
+    struct map *copy = create_empty_map();
+
+    for (int i = 0; i < m->size; ++i) {
+        struct item *item_copy = malloc(sizeof(struct item));
+
+        item_copy->key = m->items[i].key;
+        item_copy->value = m->items[i].value;
+
+        add(item_copy, copy);
+    }
+
+    return copy;
 }
 
 #endif

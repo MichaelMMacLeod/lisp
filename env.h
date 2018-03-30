@@ -1,160 +1,53 @@
 #ifndef INCLUDE_ENV_H
 #define INCLUDE_ENV_H
 
-#include <string.h>
 #include "sexpr.h"
+#include "map.h"
 
-struct binding {
-    char *symbol;
-    struct sexpr *expression;
-};
+struct item *add_null_bound(char *key, struct map *m) {
+    struct item *i = malloc(sizeof(struct item));
+    i->key = key;
+    i->value = NULL;
 
-struct env {
-    int size;
-    struct binding *bindings;
-};
-
-// symbol_string_eq - test if two strings are lexicographically equal.
-int symbol_string_eq(char *a, char *b) {
-    return strcmp(a, b) == 0;
+    return add_without_shadowing(i, m);
 }
 
-// get_binding - search through an environment for a binding whose symbol is
-// lexicographically equal to the one provided.
-//
-// NULL if no match is found.
-struct binding *get_binding(char *symbol, struct env *e) {
-    struct binding *curr = e->bindings;
+struct map *create_default_environment() {
+    size_t cs = sizeof(char);
 
-    for (int i = 0; i < e->size; ++i) {
-        if (symbol_string_eq(curr->symbol, symbol)) {
-            return curr;
-        }
+    char *nil_str = malloc(4 * cs); 
+    char *t_str = malloc(2 * cs); 
+    char *quote_str = malloc(6 * cs);
+    char *list_str = malloc(5 * cs); 
+    char *head_str = malloc(5 * cs); 
+    char *tail_str = malloc(5 * cs); 
+    char *eq_str = malloc(3 * cs); 
+    char *defvar_str = malloc(7 * cs); 
+    char *lambda_str = malloc(7 * cs); 
 
-        ++curr;
-    }
+    strcpy(nil_str, "NIL");
+    strcpy(t_str, "T");
+    strcpy(quote_str, "QUOTE");
+    strcpy(list_str, "LIST");
+    strcpy(head_str, "HEAD");
+    strcpy(tail_str, "TAIL");
+    strcpy(eq_str, "EQ");
+    strcpy(defvar_str, "DEFVAR");
+    strcpy(lambda_str, "LAMBDA");
 
-    return NULL;
-}
+    struct map *m = create_empty_map();
 
-// add_binding - add a binding to an environment.
-//
-// If there already exists a binding whose symbol is lexicographically equal to
-// the one provided, the original will be returned and nothing will be added.
-struct binding *add_binding(struct binding *b, struct env *e) {
-    struct binding *not_shadowed = get_binding(b->symbol, e);
+    add_null_bound(nil_str, m);
+    add_null_bound(t_str, m);
+    add_null_bound(quote_str, m);
+    add_null_bound(list_str, m);
+    add_null_bound(head_str, m);
+    add_null_bound(tail_str, m);
+    add_null_bound(eq_str, m);
+    add_null_bound(defvar_str, m);
+    add_null_bound(lambda_str, m);
 
-    if (not_shadowed == NULL) {
-        ++e->size;
-
-        e->bindings = realloc(e->bindings, e->size * sizeof(struct binding));
-
-        e->bindings[e->size - 1] = *b;
-
-        return b;
-    } else {
-        return not_shadowed;
-    }
-}
-
-// add_shadowing_binding - add_binding, except that it will shadow any existing
-// bindings.
-struct binding *add_shadowing_binding(struct binding *b, struct env *e) {
-    struct binding *to_be_shadowed = get_binding(b->symbol, e);
-
-    if (to_be_shadowed == NULL) {
-        ++e->size;
-
-        e->bindings = realloc(e->bindings, e->size * sizeof(struct binding));
-
-        e->bindings[e->size - 1] = *b;
-
-        return b;
-    } else {
-        to_be_shadowed->expression = b->expression;
-
-        return to_be_shadowed;
-    }
-}
-
-// add_null_binding - bind a symbol to a NULL expression, then add it to an
-// environment.
-//
-// If there already exists a binding whose symbol is lexicographically equal to
-// the one provided, the original will be returned and nothing will be added.
-struct binding *add_null_binding(char *symbol, struct env *e) {
-    struct binding *b = malloc(sizeof(struct binding));
-    b->symbol = symbol;
-    b->expression = NULL;
-
-    return add_binding(b, e);
-}
-
-// create_default_env - create an environment with default bindings.
-struct env *create_default_env() {
-    char *str_nil = malloc(4 * sizeof(char));
-    char *str_t = malloc(2 * sizeof(char));
-    char *str_quote = malloc(6 * sizeof(char));
-    char *str_list = malloc(5 * sizeof(char));
-    char *str_head = malloc(5 * sizeof(char));
-    char *str_tail = malloc(5 * sizeof(char));
-    char *str_eq = malloc(3 * sizeof(char));
-    char *str_defvar = malloc(7 * sizeof(char));
-    char *str_lambda = malloc(7 * sizeof(char));
-
-    strcpy(str_nil, "NIL");
-    strcpy(str_t, "T");
-    strcpy(str_quote, "QUOTE");
-    strcpy(str_list, "LIST");
-    strcpy(str_head, "HEAD");
-    strcpy(str_tail, "TAIL");
-    strcpy(str_eq, "EQ");
-    strcpy(str_defvar, "DEFVAR");
-    strcpy(str_lambda, "LAMBDA");
-
-    struct env *e = malloc(sizeof(struct env));
-    e->size = 0;
-    e->bindings = malloc(0);
-
-    add_null_binding(str_nil, e);
-    add_null_binding(str_t, e);
-    add_null_binding(str_quote, e);
-    add_null_binding(str_list, e);
-    add_null_binding(str_head, e);
-    add_null_binding(str_tail, e);
-    add_null_binding(str_eq, e);
-    add_null_binding(str_defvar, e);
-    add_null_binding(str_lambda, e);
-
-    return e;
-}
-
-// copy_env - copy an environment.
-//
-// The resulting environment is different in two ways:
-//  - the pointer to the environment is different
-//  - the environment's binding pointers are different
-// 
-// Note that each individual binding in the copy holds pointers to the same
-// chars and sexprs that the original does.
-struct env *copy_env(struct env *e) {
-    struct env *e_copy = malloc(sizeof(struct env));
-    e_copy->size = 0;
-    e_copy->bindings = malloc(0);
-
-    struct binding *curr = e->bindings;
-
-    for (int i = 0; i < e->size; ++i) {
-        struct binding *curr_copy = malloc(sizeof(struct binding));
-        curr_copy->symbol = curr->symbol;
-        curr_copy->expression = curr->expression;
-        
-        add_binding(curr_copy, e_copy);
-
-        ++curr;
-    }
-
-    return e_copy;
+    return m;
 }
 
 #endif

@@ -3,7 +3,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "sexpr.h"
+#include "map.h"
 #include "env.h"
 #include "stream.h"
 #include "print.h"
@@ -21,9 +23,9 @@ void upcase(char *symbol) {
     }
 }
 
-struct sexpr *sexpr_reader(char curr, FILE *stream, struct env *e);
+struct sexpr *sexpr_reader(char curr, FILE *stream, struct map *m);
 
-char *symbol_reader(char curr, FILE *stream, struct env *e) {
+char *symbol_reader(char curr, FILE *stream, struct map *m) {
     int length = 2;
 
     char *symbol = malloc(length * sizeof(char));
@@ -47,10 +49,10 @@ char *symbol_reader(char curr, FILE *stream, struct env *e) {
 
     upcase(symbol);
 
-    return add_null_binding(symbol, e)->symbol;
+    return add_null_bound(symbol, m)->key;
 }
 
-struct pair *list_reader(char curr, FILE *stream, struct env *e) {
+struct pair *list_reader(char curr, FILE *stream, struct map *m) {
     if (curr == ')') {
         return NULL;
     }
@@ -60,22 +62,22 @@ struct pair *list_reader(char curr, FILE *stream, struct env *e) {
     if (peek_char(stream) == ')') {
         result->head = NULL;
     } else {
-        result->head = sexpr_reader(get_char(stream), stream, e);
+        result->head = sexpr_reader(get_char(stream), stream, m);
     }
 
-    result->tail = list_reader(get_char(stream), stream, e);
+    result->tail = list_reader(get_char(stream), stream, m);
 
     return result;
 }
 
-struct sexpr *quote_reader(char curr, FILE *stream, struct env *e) {
-    struct sexpr *quotted_sexpr = sexpr_reader(get_char(stream), stream, e);
+struct sexpr *quote_reader(char curr, FILE *stream, struct map *m) {
+    struct sexpr *quotted_sexpr = sexpr_reader(get_char(stream), stream, m);
 
     struct pair *nil_tail_pair = malloc(sizeof(struct pair));
     nil_tail_pair->head = quotted_sexpr;
     nil_tail_pair->tail = NULL;
 
-    char *quote = get_binding("QUOTE", e)->symbol;
+    char *quote = get("QUOTE", m)->key;
     struct sexpr *quote_sexpr = malloc(sizeof(struct sexpr));
     quote_sexpr->type = SYMBOL;
     quote_sexpr->symbol = quote;
@@ -91,7 +93,7 @@ struct sexpr *quote_reader(char curr, FILE *stream, struct env *e) {
     return result;
 }
 
-struct sexpr *sexpr_reader(char curr, FILE *stream, struct env *e) {
+struct sexpr *sexpr_reader(char curr, FILE *stream, struct map *m) {
     while (curr == ' ' || curr == '\n' || curr == '\t') {
         curr = get_char(stream);
     }
@@ -100,12 +102,12 @@ struct sexpr *sexpr_reader(char curr, FILE *stream, struct env *e) {
 
     if (curr == '(') {
         result->type = PAIR;
-        result->pair = list_reader(curr, stream, e);
+        result->pair = list_reader(curr, stream, m);
     } else if (curr == '\'') {
-        return quote_reader(curr, stream, e);
+        return quote_reader(curr, stream, m);
     } else {
         result->type = SYMBOL;
-        result->symbol = symbol_reader(curr, stream, e);
+        result->symbol = symbol_reader(curr, stream, m);
     }
     
     return result;
