@@ -23,16 +23,16 @@ void upcase(char *symbol) {
     }
 }
 
-struct sexpr *sexpr_reader(char curr, FILE *stream, struct map *m);
+struct sexpr *sexpr_reader(char curr, struct stream *s, struct map *m);
 
-char *symbol_reader(char curr, FILE *stream, struct map *m) {
+char *symbol_reader(char curr, struct stream *s, struct map *m) {
     int length = 2;
 
     char *symbol = malloc(length * sizeof(char));
     symbol[0] = curr;
 
     while (1) {
-        curr = peek_char(stream);
+        curr = peek_char(s);
 
         if (curr == ' ' || curr == '\n' || curr == '\t' || curr == ')') {
             break;
@@ -42,7 +42,7 @@ char *symbol_reader(char curr, FILE *stream, struct map *m) {
         symbol = realloc(symbol, length * sizeof(char));
         symbol[length - 2] = curr;
 
-        get_char(stream);
+        get_char(s);
     }
 
     symbol[length - 1] = '\0';
@@ -52,26 +52,26 @@ char *symbol_reader(char curr, FILE *stream, struct map *m) {
     return add_null_bound(symbol, m)->key;
 }
 
-struct pair *list_reader(char curr, FILE *stream, struct map *m) {
+struct pair *list_reader(char curr, struct stream *s, struct map *m) {
     if (curr == ')') {
         return NULL;
     }
 
     struct pair *result = malloc(sizeof(struct pair));
 
-    if (peek_char(stream) == ')') {
+    if (peek_char(s) == ')') {
         result->head = NULL;
     } else {
-        result->head = sexpr_reader(get_char(stream), stream, m);
+        result->head = sexpr_reader(get_char(s), s, m);
     }
 
-    result->tail = list_reader(get_char(stream), stream, m);
+    result->tail = list_reader(get_char(s), s, m);
 
     return result;
 }
 
-struct sexpr *quote_reader(char curr, FILE *stream, struct map *m) {
-    struct sexpr *quotted_sexpr = sexpr_reader(get_char(stream), stream, m);
+struct sexpr *quote_reader(char curr, struct stream *s, struct map *m) {
+    struct sexpr *quotted_sexpr = sexpr_reader(get_char(s), s, m);
 
     struct pair *nil_tail_pair = malloc(sizeof(struct pair));
     nil_tail_pair->head = quotted_sexpr;
@@ -93,21 +93,21 @@ struct sexpr *quote_reader(char curr, FILE *stream, struct map *m) {
     return result;
 }
 
-struct sexpr *sexpr_reader(char curr, FILE *stream, struct map *m) {
+struct sexpr *sexpr_reader(char curr, struct stream *s, struct map *m) {
     while (curr == ' ' || curr == '\n' || curr == '\t') {
-        curr = get_char(stream);
+        curr = get_char(s);
     }
 
     struct sexpr *result = malloc(sizeof(struct sexpr));
 
     if (curr == '(') {
         result->type = PAIR;
-        result->pair = list_reader(curr, stream, m);
+        result->pair = list_reader(curr, s, m);
     } else if (curr == '\'') {
-        return quote_reader(curr, stream, m);
+        return quote_reader(curr, s, m);
     } else {
         result->type = SYMBOL;
-        result->symbol = symbol_reader(curr, stream, m);
+        result->symbol = symbol_reader(curr, s, m);
     }
     
     return result;

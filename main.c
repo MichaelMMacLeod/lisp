@@ -13,7 +13,11 @@ int main() {
     while (1) {
         printf("> ");
 
-        struct sexpr *read_step = sexpr_reader(get_char(stdin), stdin, environment);
+        struct stream *input = malloc(sizeof(struct stream));
+        input->type = STREAM;
+        input->stream = stdin;
+
+        struct sexpr *read_step = sexpr_reader(get_char(input), input, environment);
         struct sexpr *eval_step = eval_sexpr(read_step, environment);
         
         printf("\n");
