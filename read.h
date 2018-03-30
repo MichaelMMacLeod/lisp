@@ -10,6 +10,7 @@
 #include "stream.h"
 #include "print.h"
 #include "quote.h"
+#include "string.h"
 
 // upcase - convert a '\0'-delimited string to full uppercase.
 void upcase(char *symbol) {
@@ -71,35 +72,6 @@ struct pair *list_reader(char curr, struct stream *s, struct map *m) {
     return result;
 }
 
-struct sexpr *string_reader(char curr, struct stream *s, struct map *m) {
-    char *string = malloc(1 * sizeof(char));
-    int length = 1;
-
-    while (1) {
-        curr = peek_char(s);
-
-        if (curr == '"' || curr == '\0') {
-            break;
-        }
-
-        ++length;
-        string = realloc(string, length * sizeof(char));
-        string[length - 2] = curr;
-
-        get_char(s);
-    }
-
-    get_char(s);
-
-    string[length - 1] = '\0';
-
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = STRING;
-    result->string = string;
-
-    return result;
-}
-
 struct sexpr *sexpr_reader(char curr, struct stream *s, struct map *m) {
     while (curr == ' ' || curr == '\n' || curr == '\t') {
         curr = get_char(s);
@@ -113,7 +85,7 @@ struct sexpr *sexpr_reader(char curr, struct stream *s, struct map *m) {
     } else if (curr == '\'') {
         return single_quote_reader(curr, s, m);
     } else if (curr == '"') {
-        return string_reader(curr, s, m);
+        return double_quote_reader(curr, s, m);
     } else {
         result->type = SYMBOL;
         result->symbol = symbol_reader(curr, s, m);

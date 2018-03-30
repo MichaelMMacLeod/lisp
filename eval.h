@@ -11,6 +11,7 @@
 #include "read.h"
 #include "print.h"
 #include "c_macros.h"
+#include "string.h"
 
 struct sexpr *eval_symbol(char *symbol, struct map *m);
 struct pair *eval_pair(struct pair *p, struct map *m);
@@ -296,7 +297,8 @@ struct sexpr *eval_sexpr(struct sexpr *form, struct map *m) {
         printf("[eval_sexpr] - unbound symbol\n");
         exit(1);
     } else if (form->type == STRING) {
-        return form;
+        return eval_string(form->string);
+//        return form;
     } else {
         printf("[eval_sexpr] - undefined sexpr type\n");
         exit(1);
