@@ -42,6 +42,21 @@ void print_function(struct function *f) {
     printf("[%p]>", f);
 }
 
+void print_map(struct map *m) {
+    printf("#<MAP SIZE=%d [%p]>", m->size, m);
+}
+
+void print_item(struct item *i) {
+    printf("#<ITEM KEY=");
+    print_symbol(i->key);
+
+    printf(" VALUE=");
+
+    print_sexpr(i->value);
+
+    printf(">");
+}
+
 void print_sexpr(struct sexpr *s) {
     if (s == NULL) {
         return;
@@ -53,6 +68,10 @@ void print_sexpr(struct sexpr *s) {
         print_pair(s->pair);
     } else if (s->type == FUNCTION) {
         print_function(s->function);
+    } else if (s->type == MAP) {
+        print_map(s->map);
+    } else if (s->type == ITEM) {
+        print_item(s->item);
     }
 }
 

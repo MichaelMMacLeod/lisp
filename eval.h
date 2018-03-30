@@ -47,6 +47,21 @@ int lambda_p(char *symbol) {
     return strcmp("LAMBDA", symbol) == 0;
 }
 
+// create_map_p - true if the symbol is CREATE-MAP
+int create_map_p(char *symbol) {
+    return strcmp("CREATE-MAP", symbol) == 0;
+}
+
+// set_p - true if the symbol is SET
+int set_p(char *symbol) {
+    return strcmp("SET", symbol) == 0;
+}
+
+// get_p - true if the symbol is GET
+int get_p(char *symbol) {
+    return strcmp("GET", symbol) == 0;
+}
+
 // interpret_quote - return the argument unevaluated
 struct sexpr *interpret_quote(struct pair *args, struct map *m) {
     return args->head;
@@ -124,6 +139,42 @@ struct sexpr *interpret_lambda(struct pair *args, struct map *m) {
     struct sexpr *result = malloc(sizeof(struct sexpr));
     result->type = FUNCTION;
     result->function = f;
+
+    return result;
+}
+
+struct sexpr *interpret_create_map(struct pair *args, struct map *m) {
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+
+    result->type = MAP;
+    result->map = create_empty_map();
+
+    return result;
+}
+
+// (set (get 'hello map) 'goodbye map)
+struct sexpr *interpret_set(struct pair *args, struct map *m) {
+    char *key = eval_sexpr(args->head, m)->item->key;
+    struct sexpr *value = eval_sexpr(args->tail->head, m);
+    struct map *dest = eval_sexpr(args->tail->tail->head, m)->map;
+    
+    struct item *new_item = malloc(sizeof(struct item));
+    new_item->key = key;
+    new_item->value = value;
+
+    return add(new_item, dest)->value;
+}
+
+// ('a my-map)
+// (set (get 'a my-map) 'new-value my-map)
+struct sexpr *interpret_get(struct pair *args, struct map *m) {
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+
+    struct sexpr *evaluated_key = eval_sexpr(args->head, m);
+    struct sexpr *evaluated_map = eval_sexpr(args->tail->head, m);
+
+    result->type = ITEM;
+    result->item = get(evaluated_key->symbol, evaluated_map->map);
 
     return result;
 }
@@ -221,6 +272,12 @@ struct sexpr *eval_sexpr(struct sexpr *form, struct map *m) {
             return interpret_defvar(form->pair->tail, m);
         } else if (lambda_p(form->pair->head->symbol)) {
             return interpret_lambda(form->pair->tail, m);
+        } else if (create_map_p(form->pair->head->symbol)) {
+            return interpret_create_map(form->pair->tail, m);
+        } else if (set_p(form->pair->head->symbol)) {
+            return interpret_set(form->pair->tail, m);
+        } else if (get_p(form->pair->head->symbol)) {
+            return interpret_get(form->pair->tail, m);
         } else if (form->pair->head->type == FUNCTION) {
             return eval_function(form->pair->head->function, form->pair->tail, m);
         } else {

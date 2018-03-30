@@ -29,10 +29,21 @@ struct map *create_empty_map() {
     return result;
 }
 
+int exists(struct item *i, struct map *m) {
+    for (int k = 0; k < m->size; ++k) {
+        if (strcmp(i->key, m->items[k].key) == 0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 // get - return the item in a map with a key lexicographically equal to the one
 // provided
 //
-// return - the item, or NULL if it doesn't exist in the map
+// return - the item, or a new one with a NULL value if it doesn't exist in the
+// map
 struct item *get(char *key, struct map *m) {
     for (int k = 0; k < m->size; ++k) {
         if (strcmp(key, m->items[k].key) == 0) {
@@ -40,7 +51,12 @@ struct item *get(char *key, struct map *m) {
         }
     }
 
-    return NULL;
+    struct item *i = malloc(sizeof(struct item));
+
+    i->key = key;
+    i->value = NULL;
+
+    return i;
 }
 
 // add_non_shadowing - add an item to a map but don't shadow a duplicate if it
@@ -50,7 +66,8 @@ struct item *get(char *key, struct map *m) {
 struct item *add_without_shadowing(struct item *i, struct map *m) {
     struct item *possible_duplicate = get(i->key, m);
 
-    if (possible_duplicate == NULL) {
+//    if (possible_duplicate == NULL) {
+    if (!exists(possible_duplicate, m)) {
         ++m->size;
 
         m->items = realloc(m->items, m->size * sizeof(struct item));
@@ -68,7 +85,8 @@ struct item *add_without_shadowing(struct item *i, struct map *m) {
 struct item *add(struct item *i, struct map *m) {
     struct item *possible_duplicate = get(i->key, m);
 
-    if (possible_duplicate == NULL) {
+    if (!exists(possible_duplicate, m)) {
+//    if (possible_duplicate == NULL) {
         ++m->size;
 
         m->items = realloc(m->items, m->size * sizeof(struct item));
