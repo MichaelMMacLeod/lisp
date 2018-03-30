@@ -29,6 +29,8 @@ struct map *create_default_environment() {
     char *set_str = malloc(4 * cs);
     char *read_str = malloc(5 * cs);
     char *eval_str = malloc(5 * cs);
+    char *loop_str = malloc(5 * cs);
+    char *print_str = malloc(6 * cs);
 
     strcpy(nil_str, "NIL");
     strcpy(t_str, "T");
@@ -44,6 +46,8 @@ struct map *create_default_environment() {
     strcpy(set_str, "SET");
     strcpy(read_str, "READ");
     strcpy(eval_str, "EVAL");
+    strcpy(loop_str, "LOOP");
+    strcpy(print_str, "PRINT");
 
     struct map *m = create_empty_map();
 
@@ -61,6 +65,8 @@ struct map *create_default_environment() {
     add_null_bound(set_str, m);
     add_null_bound(read_str, m);
     add_null_bound(eval_str, m);
+    add_null_bound(loop_str, m);
+    add_null_bound(print_str, m);
 
     return m;
 }

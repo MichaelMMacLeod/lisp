@@ -9,6 +9,7 @@
 #include "env.h"
 #include "stream.h"
 #include "read.h"
+#include "print.h"
 
 struct sexpr *eval_symbol(char *symbol, struct map *m);
 struct pair *eval_pair(struct pair *p, struct map *m);
@@ -72,6 +73,16 @@ int read_p(char *symbol) {
 // eval_p - true if the symbol is EVAL
 int eval_p(char *symbol) {
     return strcmp("EVAL", symbol) == 0;
+}
+
+// loop_p - true if the symbol is LOOP
+int loop_p(char *symbol) {
+    return strcmp("LOOP", symbol) == 0;
+}
+
+// print_p - true if the symbol is PRINT
+int print_p(char *symbol) {
+    return strcmp("PRINT", symbol) == 0;
 }
 
 // interpret_quote - return the argument unevaluated
@@ -192,6 +203,8 @@ struct sexpr *interpret_read(struct pair *args, struct map *m) {
     struct stream *s = malloc(sizeof(struct stream));
     
     if (args == NULL) {
+        printf("[%p]> ", m);
+        
         s->type = STREAM;
         s->stream = stdin;
     } else {
@@ -204,6 +217,20 @@ struct sexpr *interpret_read(struct pair *args, struct map *m) {
 
 struct sexpr *interpret_eval(struct pair *args, struct map *m) {
     return eval_sexpr(eval_sexpr(args->head, m), m);
+}
+
+struct sexpr *interpret_loop(struct pair *args, struct map *m) {
+    while (1) {
+        eval_sexpr(args->head, m);
+    }
+}
+
+struct sexpr *interpret_print(struct pair *args, struct map *m) {
+    struct sexpr *evaluated_arg = eval_sexpr(args->head, m);
+
+    print_sexpr_toplevel(evaluated_arg);
+
+    return evaluated_arg;
 }
 
 // create_function_env - copy an environment and introduce function arg bindings
@@ -309,6 +336,10 @@ struct sexpr *eval_sexpr(struct sexpr *form, struct map *m) {
             return interpret_read(form->pair->tail, m);
         } else if (eval_p(form->pair->head->symbol)) {
             return interpret_eval(form->pair->tail, m);
+        } else if (loop_p(form->pair->head->symbol)) {
+            return interpret_loop(form->pair->tail, m);
+        } else if (print_p(form->pair->head->symbol)) {
+            return interpret_print(form->pair->tail, m);
         } else if (form->pair->head->type == FUNCTION) {
             return eval_function(form->pair->head->function, form->pair->tail, m);
         } else {
