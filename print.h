@@ -57,6 +57,10 @@ void print_item(struct item *i) {
     printf(">");
 }
 
+void print_string(char *string) {
+    printf("\"%s\"", string);
+}
+
 void print_sexpr(struct sexpr *s) {
     if (s == NULL) {
         return;
@@ -72,6 +76,8 @@ void print_sexpr(struct sexpr *s) {
         print_map(s->map);
     } else if (s->type == ITEM) {
         print_item(s->item);
+    } else if (s->type == STRING) {
+        print_string(s->string);
     }
 }
 

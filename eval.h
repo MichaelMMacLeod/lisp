@@ -7,6 +7,8 @@
 #include "sexpr.h"
 #include "map.h"
 #include "env.h"
+#include "stream.h"
+#include "read.h"
 
 struct sexpr *eval_symbol(char *symbol, struct map *m);
 struct pair *eval_pair(struct pair *p, struct map *m);
@@ -60,6 +62,11 @@ int set_p(char *symbol) {
 // get_p - true if the symbol is GET
 int get_p(char *symbol) {
     return strcmp("GET", symbol) == 0;
+}
+
+// read_p - true if the symbol is READ
+int read_p(char *symbol) {
+    return strcmp("READ", symbol) == 0;
 }
 
 // interpret_quote - return the argument unevaluated
@@ -152,7 +159,6 @@ struct sexpr *interpret_create_map(struct pair *args, struct map *m) {
     return result;
 }
 
-// (set (get 'hello map) 'goodbye map)
 struct sexpr *interpret_set(struct pair *args, struct map *m) {
     char *key = eval_sexpr(args->head, m)->item->key;
     struct sexpr *value = eval_sexpr(args->tail->head, m);
@@ -165,8 +171,6 @@ struct sexpr *interpret_set(struct pair *args, struct map *m) {
     return add(new_item, dest)->value;
 }
 
-// ('a my-map)
-// (set (get 'a my-map) 'new-value my-map)
 struct sexpr *interpret_get(struct pair *args, struct map *m) {
     struct sexpr *result = malloc(sizeof(struct sexpr));
 
@@ -177,6 +181,15 @@ struct sexpr *interpret_get(struct pair *args, struct map *m) {
     result->item = get(evaluated_key->symbol, evaluated_map->map);
 
     return result;
+}
+
+struct sexpr *interpret_read(struct pair *args, struct map *m) {
+    struct stream *s = malloc(sizeof(struct stream));
+    
+    s->type = STRING_STREAM;
+    s->string_stream = args->head->string;
+
+    return sexpr_reader(get_char(s), s, m);
 }
 
 // create_function_env - copy an environment and introduce function arg bindings
@@ -278,6 +291,8 @@ struct sexpr *eval_sexpr(struct sexpr *form, struct map *m) {
             return interpret_set(form->pair->tail, m);
         } else if (get_p(form->pair->head->symbol)) {
             return interpret_get(form->pair->tail, m);
+        } else if (read_p(form->pair->head->symbol)) {
+            return interpret_read(form->pair->tail, m);
         } else if (form->pair->head->type == FUNCTION) {
             return eval_function(form->pair->head->function, form->pair->tail, m);
         } else {
@@ -292,6 +307,8 @@ struct sexpr *eval_sexpr(struct sexpr *form, struct map *m) {
     } else if (form->type == FUNCTION) {
         printf("[eval_sexpr] - unbound symbol\n");
         exit(1);
+    } else if (form->type == STRING) {
+        return form;
     } else {
         printf("[eval_sexpr] - undefined sexpr type\n");
         exit(1);
