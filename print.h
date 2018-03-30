@@ -10,14 +10,36 @@ void print_symbol(char *symbol) {
 
 void print_sexpr(struct sexpr *s);
 
-void print_pair(struct pair *p) {
+void print_pair_helper(struct pair *p) {
     print_sexpr(p->head);
 
     if (p->tail != NULL) {
         printf(" ");
 
-        print_pair(p->tail);
+        print_pair_helper(p->tail);
     }
+}
+
+void print_pair(struct pair *p) {
+    printf("(");
+    print_pair_helper(p);
+    printf(")");
+}
+
+void print_function(struct function *f) {
+    printf("#<FUNCTION (LAMBDA ");
+
+    print_pair(f->args);
+
+    if (f->body != NULL) {
+        printf(" ");
+    }
+
+    print_sexpr(f->body);
+
+    printf(") ");
+
+    printf("[%p]>", f);
 }
 
 void print_sexpr(struct sexpr *s) {
@@ -28,9 +50,9 @@ void print_sexpr(struct sexpr *s) {
     if (s->type == SYMBOL) {
         print_symbol(s->symbol);
     } else if (s->type == PAIR) {
-        printf("(");
         print_pair(s->pair);
-        printf(")");
+    } else if (s->type == FUNCTION) {
+        print_function(s->function);
     }
 }
 
