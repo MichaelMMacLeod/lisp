@@ -59,11 +59,11 @@ struct pair *list_reader(char curr, FILE *stream, struct env *e) {
 
     if (peek_char(stream) == ')') {
         result->head = NULL;
-        result->tail = list_reader(get_char(stream), stream, e);
     } else {
         result->head = sexpr_reader(get_char(stream), stream, e);
-        result->tail = list_reader(get_char(stream), stream, e);
     }
+
+    result->tail = list_reader(get_char(stream), stream, e);
 
     return result;
 }
