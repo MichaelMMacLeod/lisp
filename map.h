@@ -163,4 +163,16 @@ struct sexpr *interpret_set(struct pair *args, struct map *package) {
     return add(new_item, eval_sexpr(args->tail->tail->head, package)->map)->value;
 }
 
+struct sexpr *interpret_get(struct pair *args, struct map *package) {
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+
+    struct sexpr *evaluated_key = eval_sexpr(args->head, package);
+    struct sexpr *evaluated_map = eval_sexpr(args->tail->head, package);
+
+    result->type = ITEM;
+    result->item = get(evaluated_key->symbol, evaluated_map->map);
+
+    return result;
+}
+
 #endif

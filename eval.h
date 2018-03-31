@@ -89,18 +89,6 @@ struct sexpr *interpret_lambda(struct pair *args, struct map *m) {
     return result;
 }
 
-struct sexpr *interpret_get(struct pair *args, struct map *m) {
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-
-    struct sexpr *evaluated_key = eval_sexpr(args->head, m);
-    struct sexpr *evaluated_map = eval_sexpr(args->tail->head, m);
-
-    result->type = ITEM;
-    result->item = get(evaluated_key->symbol, evaluated_map->map);
-
-    return result;
-}
-
 struct sexpr *interpret_read(struct pair *args, struct map *package) {
     struct stream *s = malloc(sizeof(struct stream));
     
