@@ -1,9 +1,14 @@
 #ifndef INCLUDE_MAP_H
 #define INCLUDE_MAP_H
 
-#include <stdlib.h>
-#include <string.h>
-#include "sexpr.h"
+struct sexpr *eval_symbol(char *symbol, struct map *m);
+struct pair *eval_pair(struct pair *p, struct map *m);
+struct sexpr *eval_sexpr(struct sexpr *form, struct map *m);
+struct item *add(struct item *i, struct map *m);
+
+///////////////////////////////////////////////////////////////////////////////
+// utilities
+///////////////////////////////////////////////////////////////////////////////
 
 // create_item - create an item with a key and value
 //
@@ -136,6 +141,26 @@ struct map *copy(struct map *m) {
     }
 
     return copy;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// eval-time
+///////////////////////////////////////////////////////////////////////////////
+
+struct sexpr *interpret_create_map(struct pair *args, struct map *package) {
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = MAP;
+    result->map = create_empty_map();
+
+    return result;
+}
+
+struct sexpr *interpret_set(struct pair *args, struct map *package) {
+    struct item *new_item = malloc(sizeof(struct item));
+    new_item->key = eval_sexpr(args->head, package)->item->key;
+    new_item->value = eval_sexpr(args->tail->head, package);
+
+    return add(new_item, eval_sexpr(args->tail->tail->head, package)->map)->value;
 }
 
 #endif

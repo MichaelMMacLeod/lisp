@@ -1,11 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include "sexpr.h"
-#include "env.h"
-#include "read.h"
 #include "eval.h"
-#include "print.h"
-#include "stream.h"
 
 int main() {
     struct map *environment = create_default_environment();

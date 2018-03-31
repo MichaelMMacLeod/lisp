@@ -1,9 +1,6 @@
 #ifndef INCLUDE_PRINT_H
 #define INCLUDE_PRINT_H
 
-#include <stdio.h>
-#include "sexpr.h"
-
 void print_symbol(char *symbol) {
     printf("%s", symbol);
 }

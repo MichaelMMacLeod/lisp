@@ -1,22 +1,12 @@
 #ifndef INCLUDE_QUOTE_H
 #define INCLUDE_QUOTE_H
 
-#include "sexpr.h"
-#include "read.h"
-
-///////////////////////////////////////////////////////////////////////////////
-// run-time
-///////////////////////////////////////////////////////////////////////////////
-
-// interpret_quote - return the first argument unevaluated
-struct sexpr *interpret_quote(struct pair *args, struct map *package) {
-    return args->head;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // read-time
 ///////////////////////////////////////////////////////////////////////////////
 
+
+struct item *get(char *key, struct map *m);
 struct sexpr *sexpr_reader(char curr, struct stream *in, struct map *package);
 
 // quote_mark_reader - map 'symbol to (quote symbol)
@@ -40,6 +30,15 @@ struct sexpr *single_quote_reader(char curr, struct stream *in, struct map *pack
     result->pair = result_pair;
 
     return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// eval-time
+///////////////////////////////////////////////////////////////////////////////
+
+// interpret_quote - return the first argument unevaluated
+struct sexpr *interpret_quote(struct pair *args, struct map *package) {
+    return args->head;
 }
 
 #endif

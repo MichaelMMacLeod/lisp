@@ -1,17 +1,6 @@
 #ifndef INCLUDE_READ_H
 #define INCLUDE_READ_H
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include "sexpr.h"
-#include "map.h"
-#include "env.h"
-#include "stream.h"
-#include "print.h"
-#include "quote.h"
-#include "string.h"
-
 // upcase - convert a '\0'-delimited string to full uppercase.
 void upcase(char *symbol) {
     char *curr = symbol;

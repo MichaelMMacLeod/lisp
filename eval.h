@@ -1,21 +1,24 @@
 #ifndef EVAL_NEW_H
 #define EVAL_NEW_H
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include "c_macros.h"
 #include "sexpr.h"
+#include "stream.h"
+#include "string.h"
+#include "quote.h"
 #include "map.h"
 #include "env.h"
-#include "stream.h"
-#include "read.h"
 #include "print.h"
-#include "c_macros.h"
-#include "string.h"
+#include "read.h"
 
 struct sexpr *eval_symbol(char *symbol, struct map *m);
 struct pair *eval_pair(struct pair *p, struct map *m);
 struct sexpr *eval_sexpr(struct sexpr *form, struct map *m);
+struct item *add(struct item *i, struct map *m);
 
 MAKE_P(quote, QUOTE);
 MAKE_P(list, LIST);
@@ -106,27 +109,6 @@ struct sexpr *interpret_lambda(struct pair *args, struct map *m) {
     result->function = f;
 
     return result;
-}
-
-struct sexpr *interpret_create_map(struct pair *args, struct map *m) {
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-
-    result->type = MAP;
-    result->map = create_empty_map();
-
-    return result;
-}
-
-struct sexpr *interpret_set(struct pair *args, struct map *m) {
-    char *key = eval_sexpr(args->head, m)->item->key;
-    struct sexpr *value = eval_sexpr(args->tail->head, m);
-    struct map *dest = eval_sexpr(args->tail->tail->head, m)->map;
-    
-    struct item *new_item = malloc(sizeof(struct item));
-    new_item->key = key;
-    new_item->value = value;
-
-    return add(new_item, dest)->value;
 }
 
 struct sexpr *interpret_get(struct pair *args, struct map *m) {
