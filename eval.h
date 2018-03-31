@@ -123,20 +123,20 @@ struct sexpr *interpret_get(struct pair *args, struct map *m) {
     return result;
 }
 
-struct sexpr *interpret_read(struct pair *args, struct map *m) {
+struct sexpr *interpret_read(struct pair *args, struct map *package) {
     struct stream *s = malloc(sizeof(struct stream));
     
     if (args == NULL) {
-        printf("[%p]> ", m);
+        printf("[%p]> ", package);
         
         s->type = STREAM;
         s->stream = stdin;
     } else {
         s->type = STRING_STREAM;
-        s->string_stream = args->head->string;
+        s->string_stream = eval_sexpr(args->head, package)->string;
     }
 
-    return sexpr_reader(get_char(s), s, m);
+    return sexpr_reader(get_char(s), s, package);
 }
 
 struct sexpr *interpret_eval(struct pair *args, struct map *m) {
