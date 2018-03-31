@@ -258,7 +258,6 @@ struct sexpr *eval_sexpr(struct sexpr *form, struct map *m) {
         exit(1);
     } else if (form->type == STRING) {
         return eval_string(form->string);
-//        return form;
     } else {
         printf("[eval_sexpr] - undefined sexpr type\n");
         exit(1);
