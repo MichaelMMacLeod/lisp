@@ -13,6 +13,7 @@
 #include "map.h"
 #include "env.h"
 #include "print.h"
+#include "list.h"
 #include "read.h"
 
 struct sexpr *eval_symbol(char *symbol, struct map *m);
@@ -34,29 +35,6 @@ MAKE_P(read, READ);
 MAKE_P(eval, EVAL);
 MAKE_P(loop, LOOP);
 MAKE_P(print, PRINT);
-
-// interpret_list - evaluate each argument and place them in a list
-struct sexpr *interpret_list(struct pair *args, struct map *m) {
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = PAIR;
-    result->pair = eval_pair(args, m);
-
-    return result;
-}
-
-// interpret_head - evaluate the list, then return its head
-struct sexpr *interpret_head(struct pair *args, struct map *m) {
-    return eval_sexpr(args->head, m)->pair->head;
-}
-
-// interpret_tail - evaluate the list, then return its tail
-struct sexpr *interpret_tail(struct pair *args, struct map *m) {
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = PAIR;
-    result->pair = eval_sexpr(args->head, m)->pair->tail;
-
-    return result;
-}
 
 // interpret_eq - evaluate the arguments. T if they are equal, NIL otherwise
 struct sexpr *interpret_eq(struct pair *args, struct map *m) {

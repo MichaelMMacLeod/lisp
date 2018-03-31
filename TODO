@@ -1,0 +1,65 @@
+determine what read and eval functions should return
+    - always sexpr?
+    - or more specific type?
+
+make read functions better
+    - ie, open_paren_reader should only ever recieve '(' as curr, never space or something
+      else.
+    - determine if the above statement makes any sort of sense
+
+memory management
+    - there are currently no free() calls
+    - will probably have to create some sort of garbage collection
+
+add property lists
+    - to what? symbols? or sexpr in general?
+    - needed, so we can have properties like `DO-NOT-EVAL-ARGS' for lambda expressions
+      so we can make macros
+
+rename things
+    - reading and evaluating functions are passed a namespace to intern symbols in. I've 
+      been calling this an `environment', or sometimes a `package', or just a `map'. Do
+      research to figure out what naming convention fits
+        - things to keep in mind: a copy is made of this structure when creating lexical
+          environments to intern new symbols in (see lambda-related functions). maybe this
+          could affect how we name things. for example, the name `package' kind of implies
+          an unchanging thing, while `namespace' feels more flexible. using `environment'
+          feels a bit too abstract.
+
+make the underlying package/namespace/whatever available at runtime
+
+add reader macros
+    - requires creating a readtable of type `map', which holds string->function bindings.
+      the sexpr_reader function will be passed a reference to this table, and will have
+      to then decide which reader macro to call based on what the current character.
+    - add functions which help modify the readtable
+
+add numeric types
+    - and operations, of course
+        - + * / - etc.
+    - integers/floats/complex/bignums? Maybe shove them all into a struct *numeric type?
+
+add safety
+    - we don't want the repl to crash when we make a syntax error; we just want it to tell
+      us we made an error, then give us the option of leaving, or returning to where we
+      were at before the error
+
+more functions
+    - equality
+        - figure out how to do naming conventions correctly
+            - common lisps `eq', `equal', `=', `string=', `equalp' tend to generate
+              a lot of confusion
+            - maybe have something like pointer=, string=, integer=, float=, etc?
+            - or maybe have some sort of typeclass-like construct, where we could define
+              (generic = (a b)), and then implement it for different types. that way
+              = could mean string= or integer= at the same time.
+            - is the above statement at all plausible
+    - string related functions
+        - substring, etc.
+    - list related functions
+        - init, last
+    - loops
+        - figure out how we want to do iteration. big loop macro? do-like constructs?
+          functional map? lazy iterators?
+        - again, like with equality, is there a way to have one function that can map over
+        - every collection? - yes, is it plausible to do? - maybe
