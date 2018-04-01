@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+gcc -g -Wall ./src/main.c

@@ -5,17 +5,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "c_macros.h"
-#include "sexpr.h"
-#include "stream.h"
-#include "string.h"
-#include "quote.h"
-#include "map.h"
-#include "env.h"
-#include "print.h"
-#include "list.h"
-#include "symbol.h"
-#include "read.h"
+#include "../c_macros.h"
+#include "../types/sexpr.h"
+#include "../types/stream.h"
+#include "../types/string.h"
+#include "../functions/quote.h"
+#include "../types/map.h"
+#include "../env.h"
+#include "../functions/print.h"
+#include "../types/list.h"
+#include "../types/symbol.h"
+#include "../functions/read.h"
 
 struct sexpr *eval_symbol(char *symbol, struct map *m);
 struct list *eval_list(struct list *p, struct map *m);
