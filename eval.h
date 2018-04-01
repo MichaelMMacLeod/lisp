@@ -14,6 +14,7 @@
 #include "env.h"
 #include "print.h"
 #include "list.h"
+#include "symbol.h"
 #include "read.h"
 
 struct sexpr *eval_symbol(char *symbol, struct map *m);
