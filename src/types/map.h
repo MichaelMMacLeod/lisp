@@ -1,11 +1,6 @@
 #ifndef INCLUDE_MAP_H
 #define INCLUDE_MAP_H
 
-struct sexpr *eval_symbol(char *symbol, struct map *m);
-struct list *eval_list(struct list *p, struct map *m);
-struct sexpr *eval_sexpr(struct sexpr *form, struct map *m);
-struct item *add(struct item *i, struct map *m);
-
 ///////////////////////////////////////////////////////////////////////////////
 // utilities
 ///////////////////////////////////////////////////////////////////////////////

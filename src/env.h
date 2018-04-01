@@ -1,9 +1,6 @@
 #ifndef INCLUDE_ENV_H
 #define INCLUDE_ENV_H
 
-//#include "sexpr.h"
-//#include "map.h"
-
 struct item *add_null_bound(char *key, struct map *m) {
     struct item *i = malloc(sizeof(struct item));
     i->key = key;

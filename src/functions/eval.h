@@ -5,22 +5,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../c_macros.h"
 #include "../types/sexpr.h"
+
+struct sexpr *eval_symbol(char *symbol, struct map *m);
+struct list *eval_list(struct list *p, struct map *m);
+struct sexpr *eval_sexpr(struct sexpr *form, struct map *m);
+struct item *add(struct item *i, struct map *m);
+
+#include "../c_macros.h"
 #include "../types/stream.h"
 #include "../types/string.h"
 #include "../functions/quote.h"
+#include "../functions/eq.h"
 #include "../types/map.h"
 #include "../env.h"
 #include "../functions/print.h"
 #include "../types/list.h"
 #include "../types/symbol.h"
 #include "../functions/read.h"
-
-struct sexpr *eval_symbol(char *symbol, struct map *m);
-struct list *eval_list(struct list *p, struct map *m);
-struct sexpr *eval_sexpr(struct sexpr *form, struct map *m);
-struct item *add(struct item *i, struct map *m);
 
 MAKE_P(quote, QUOTE);
 MAKE_P(list, LIST);
@@ -36,23 +38,6 @@ MAKE_P(read, READ);
 MAKE_P(eval, EVAL);
 MAKE_P(loop, LOOP);
 MAKE_P(print, PRINT);
-
-// interpret_eq - evaluate the arguments. T if they are equal, NIL otherwise
-struct sexpr *interpret_eq(struct list *args, struct map *m) {
-    args = eval_list(args, m);
-
-    struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = SYMBOL;
-
-    if (args->head->type == SYMBOL && args->tail->head->type == SYMBOL
-            && args->head->symbol == args->tail->head->symbol) {
-        result->symbol = get("T", m)->key;
-    } else {
-        result->symbol = get("NIL", m)->key;
-    }
-
-    return result;
-}
 
 // interpret_defvar - bind a symbol to an evaluated expression, add to env
 struct sexpr *interpret_defvar(struct list *args, struct map *m) {
