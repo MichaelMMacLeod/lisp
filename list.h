@@ -2,11 +2,11 @@
 #define INCLUDE_LIST_H
 
 ////////////////////////////////////////////////////////////////////////////////
-// read-time
+// utilities
 ////////////////////////////////////////////////////////////////////////////////
 
-struct pair *open_paren_reader(char curr, struct stream *in, struct map *package) {
-    if (curr == ')') {
+struct pair *open_paren_reader_helper(char c, struct stream *in, struct map *package) {
+    if (c == ')') {
         return NULL;
     }
 
@@ -18,7 +18,19 @@ struct pair *open_paren_reader(char curr, struct stream *in, struct map *package
         result->head = sexpr_reader(get_char(in), in, package);
     }
 
-    result->tail = open_paren_reader(get_char(in), in, package);
+    result->tail = open_paren_reader_helper(get_char(in), in, package);
+
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// read-time
+////////////////////////////////////////////////////////////////////////////////
+
+struct sexpr *open_paren_reader(char c, struct stream *in, struct map *package) {
+    struct sexpr *result = malloc(sizeof(struct sexpr));
+    result->type = PAIR;
+    result->pair = open_paren_reader_helper(c, in, package);
 
     return result;
 }
