@@ -2,10 +2,10 @@
 #define INCLUDE_SEXPR_H
 
 struct sexpr {
-    enum { SYMBOL, PAIR, FUNCTION, ITEM, MAP, STRING } type;
+    enum { SYMBOL, LIST, FUNCTION, ITEM, MAP, STRING } type;
     union {
         char *symbol;
-        struct pair *pair;
+        struct list *list;
         struct function *function;
         struct item *item;
         struct map *map;
@@ -13,13 +13,13 @@ struct sexpr {
     };
 };
 
-struct pair {
+struct list {
     struct sexpr *head;
-    struct pair *tail;
+    struct list *tail;
 };
 
 struct function {
-    struct pair *args;
+    struct list *args;
     struct sexpr *body;
 };
 

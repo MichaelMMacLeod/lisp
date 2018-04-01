@@ -5,12 +5,12 @@
 // utilities
 ////////////////////////////////////////////////////////////////////////////////
 
-struct pair *open_paren_reader_helper(char c, struct stream *in, struct map *package) {
+struct list *open_paren_reader_helper(char c, struct stream *in, struct map *package) {
     if (c == ')') {
         return NULL;
     }
 
-    struct pair *result = malloc(sizeof(struct pair));
+    struct list *result = malloc(sizeof(struct list));
 
     if (peek_char(in) == ')') {
         result->head = NULL;
@@ -29,8 +29,8 @@ struct pair *open_paren_reader_helper(char c, struct stream *in, struct map *pac
 
 struct sexpr *open_paren_reader(char c, struct stream *in, struct map *package) {
     struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = PAIR;
-    result->pair = open_paren_reader_helper(c, in, package);
+    result->type = LIST;
+    result->list = open_paren_reader_helper(c, in, package);
 
     return result;
 }
@@ -39,22 +39,22 @@ struct sexpr *open_paren_reader(char c, struct stream *in, struct map *package) 
 // eval-time
 ////////////////////////////////////////////////////////////////////////////////
 
-struct sexpr *interpret_list(struct pair *args, struct map *package) {
+struct sexpr *interpret_list(struct list *args, struct map *package) {
     struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = PAIR;
-    result->pair = eval_pair(args, package);
+    result->type = LIST;
+    result->list = eval_list(args, package);
 
     return result;
 }
 
-struct sexpr *interpret_head(struct pair *args, struct map *package) {
-    return eval_sexpr(args->head, package)->pair->head;
+struct sexpr *interpret_head(struct list *args, struct map *package) {
+    return eval_sexpr(args->head, package)->list->head;
 }
 
-struct sexpr *interpret_tail(struct pair *args, struct map *m) {
+struct sexpr *interpret_tail(struct list *args, struct map *m) {
     struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = PAIR;
-    result->pair = eval_sexpr(args->head, m)->pair->tail;
+    result->type = LIST;
+    result->list = eval_sexpr(args->head, m)->list->tail;
 
     return result;
 }

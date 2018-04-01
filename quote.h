@@ -12,7 +12,7 @@ struct sexpr *sexpr_reader(char curr, struct stream *in, struct map *package);
 struct sexpr *single_quote_reader(char curr, struct stream *in, struct map *package) {
     struct sexpr *to_be_quotted = sexpr_reader(get_char(in), in, package);
 
-    struct pair *null_tail = malloc(sizeof(struct pair));
+    struct list *null_tail = malloc(sizeof(struct list));
     null_tail->head = to_be_quotted;
     null_tail->tail = NULL;
 
@@ -20,13 +20,13 @@ struct sexpr *single_quote_reader(char curr, struct stream *in, struct map *pack
     quote_sexpr->type = SYMBOL;
     quote_sexpr->symbol = get("QUOTE", package)->key;
 
-    struct pair *result_pair = malloc(sizeof(struct pair));
-    result_pair->head = quote_sexpr;
-    result_pair->tail = null_tail;
+    struct list *result_list = malloc(sizeof(struct list));
+    result_list->head = quote_sexpr;
+    result_list->tail = null_tail;
 
     struct sexpr *result = malloc(sizeof(struct sexpr));
-    result->type = PAIR;
-    result->pair = result_pair;
+    result->type = LIST;
+    result->list = result_list;
 
     return result;
 }
@@ -36,7 +36,7 @@ struct sexpr *single_quote_reader(char curr, struct stream *in, struct map *pack
 ///////////////////////////////////////////////////////////////////////////////
 
 // interpret_quote - return the first argument unevaluated
-struct sexpr *interpret_quote(struct pair *args, struct map *package) {
+struct sexpr *interpret_quote(struct list *args, struct map *package) {
     return args->head;
 }
 

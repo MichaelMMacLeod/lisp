@@ -2,7 +2,7 @@
 #define INCLUDE_MAP_H
 
 struct sexpr *eval_symbol(char *symbol, struct map *m);
-struct pair *eval_pair(struct pair *p, struct map *m);
+struct list *eval_list(struct list *p, struct map *m);
 struct sexpr *eval_sexpr(struct sexpr *form, struct map *m);
 struct item *add(struct item *i, struct map *m);
 
@@ -147,7 +147,7 @@ struct map *copy(struct map *m) {
 // eval-time
 ///////////////////////////////////////////////////////////////////////////////
 
-struct sexpr *interpret_create_map(struct pair *args, struct map *package) {
+struct sexpr *interpret_create_map(struct list *args, struct map *package) {
     struct sexpr *result = malloc(sizeof(struct sexpr));
     result->type = MAP;
     result->map = create_empty_map();
@@ -155,7 +155,7 @@ struct sexpr *interpret_create_map(struct pair *args, struct map *package) {
     return result;
 }
 
-struct sexpr *interpret_set(struct pair *args, struct map *package) {
+struct sexpr *interpret_set(struct list *args, struct map *package) {
     struct item *new_item = malloc(sizeof(struct item));
     new_item->key = eval_sexpr(args->head, package)->item->key;
     new_item->value = eval_sexpr(args->tail->head, package);
@@ -163,7 +163,7 @@ struct sexpr *interpret_set(struct pair *args, struct map *package) {
     return add(new_item, eval_sexpr(args->tail->tail->head, package)->map)->value;
 }
 
-struct sexpr *interpret_get(struct pair *args, struct map *package) {
+struct sexpr *interpret_get(struct list *args, struct map *package) {
     struct sexpr *result = malloc(sizeof(struct sexpr));
 
     struct sexpr *evaluated_key = eval_sexpr(args->head, package);

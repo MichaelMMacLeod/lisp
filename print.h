@@ -7,26 +7,26 @@ void print_symbol(char *symbol) {
 
 void print_sexpr(struct sexpr *s);
 
-void print_pair_helper(struct pair *p) {
+void print_list_helper(struct list *p) {
     print_sexpr(p->head);
 
     if (p->tail != NULL) {
         printf(" ");
 
-        print_pair_helper(p->tail);
+        print_list_helper(p->tail);
     }
 }
 
-void print_pair(struct pair *p) {
+void print_list(struct list *p) {
     printf("(");
-    print_pair_helper(p);
+    print_list_helper(p);
     printf(")");
 }
 
 void print_function(struct function *f) {
     printf("#<FUNCTION (LAMBDA ");
 
-    print_pair(f->args);
+    print_list(f->args);
 
     if (f->body != NULL) {
         printf(" ");
@@ -65,8 +65,8 @@ void print_sexpr(struct sexpr *s) {
 
     if (s->type == SYMBOL) {
         print_symbol(s->symbol);
-    } else if (s->type == PAIR) {
-        print_pair(s->pair);
+    } else if (s->type == LIST) {
+        print_list(s->list);
     } else if (s->type == FUNCTION) {
         print_function(s->function);
     } else if (s->type == MAP) {

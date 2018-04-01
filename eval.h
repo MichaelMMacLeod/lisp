@@ -18,7 +18,7 @@
 #include "read.h"
 
 struct sexpr *eval_symbol(char *symbol, struct map *m);
-struct pair *eval_pair(struct pair *p, struct map *m);
+struct list *eval_list(struct list *p, struct map *m);
 struct sexpr *eval_sexpr(struct sexpr *form, struct map *m);
 struct item *add(struct item *i, struct map *m);
 
@@ -38,8 +38,8 @@ MAKE_P(loop, LOOP);
 MAKE_P(print, PRINT);
 
 // interpret_eq - evaluate the arguments. T if they are equal, NIL otherwise
-struct sexpr *interpret_eq(struct pair *args, struct map *m) {
-    args = eval_pair(args, m);
+struct sexpr *interpret_eq(struct list *args, struct map *m) {
+    args = eval_list(args, m);
 
     struct sexpr *result = malloc(sizeof(struct sexpr));
     result->type = SYMBOL;
@@ -55,7 +55,7 @@ struct sexpr *interpret_eq(struct pair *args, struct map *m) {
 }
 
 // interpret_defvar - bind a symbol to an evaluated expression, add to env
-struct sexpr *interpret_defvar(struct pair *args, struct map *m) {
+struct sexpr *interpret_defvar(struct list *args, struct map *m) {
     struct item *i = malloc(sizeof(struct map));
     i->key = args->head->symbol;
     i->value = eval_sexpr(args->tail->head, m);
@@ -68,11 +68,11 @@ struct sexpr *interpret_defvar(struct pair *args, struct map *m) {
 }
 
 // interpret_lambda - create a lambda expression
-struct sexpr *interpret_lambda(struct pair *args, struct map *m) {
+struct sexpr *interpret_lambda(struct list *args, struct map *m) {
     struct function *f = malloc(sizeof(struct function));
 
-    if (args->head->pair != NULL) {
-        f->args = args->head->pair;
+    if (args->head->list != NULL) {
+        f->args = args->head->list;
     } else {
         f->args = NULL;
     }
@@ -90,7 +90,7 @@ struct sexpr *interpret_lambda(struct pair *args, struct map *m) {
     return result;
 }
 
-struct sexpr *interpret_read(struct pair *args, struct map *package) {
+struct sexpr *interpret_read(struct list *args, struct map *package) {
     struct stream *s = malloc(sizeof(struct stream));
     
     if (args == NULL) {
@@ -106,17 +106,17 @@ struct sexpr *interpret_read(struct pair *args, struct map *package) {
     return sexpr_reader(get_char(s), s, package);
 }
 
-struct sexpr *interpret_eval(struct pair *args, struct map *m) {
+struct sexpr *interpret_eval(struct list *args, struct map *m) {
     return eval_sexpr(eval_sexpr(args->head, m), m);
 }
 
-struct sexpr *interpret_loop(struct pair *args, struct map *m) {
+struct sexpr *interpret_loop(struct list *args, struct map *m) {
     while (1) {
         eval_sexpr(args->head, m);
     }
 }
 
-struct sexpr *interpret_print(struct pair *args, struct map *m) {
+struct sexpr *interpret_print(struct list *args, struct map *m) {
     struct sexpr *evaluated_arg = eval_sexpr(args->head, m);
 
     print_sexpr_toplevel(evaluated_arg);
@@ -126,13 +126,13 @@ struct sexpr *interpret_print(struct pair *args, struct map *m) {
 
 // create_function_env - copy an environment and introduce function arg bindings
 struct map *create_function_environment(
-        struct pair *lambda_bindings, 
-        struct pair *args, 
+        struct list *lambda_bindings, 
+        struct list *args, 
         struct map *m) {
     struct map *f_env = copy(m);
 
     int n_lambda_bindings = 0;
-    struct pair *curr_lambda_binding = lambda_bindings;
+    struct list *curr_lambda_binding = lambda_bindings;
 
     while (curr_lambda_binding != NULL
             && curr_lambda_binding->head != NULL) {
@@ -141,7 +141,7 @@ struct map *create_function_environment(
     }
 
     curr_lambda_binding = lambda_bindings;
-    struct pair *curr_arg = args;
+    struct list *curr_arg = args;
 
     for (int j = 0; j < n_lambda_bindings; ++j) {
         struct item *i = malloc(sizeof(struct item));
@@ -158,7 +158,7 @@ struct map *create_function_environment(
 }
 
 // eval_function - evaluate a function
-struct sexpr *eval_function(struct function *f, struct pair *args, struct map *m) {
+struct sexpr *eval_function(struct function *f, struct list *args, struct map *m) {
     struct map *f_env = create_function_environment(f->args, args, m);
 
     return eval_sexpr(f->body, f_env);
@@ -184,13 +184,13 @@ struct sexpr *eval_symbol(char *symbol, struct map *m) {
     }
 }
 
-// eval_pair - evaluate a pair
-struct pair *eval_pair(struct pair *p, struct map *m) {
-    struct pair *result = malloc(sizeof(struct pair));
+// eval_list - evaluate a list
+struct list *eval_list(struct list *p, struct map *m) {
+    struct list *result = malloc(sizeof(struct list));
     result->head = eval_sexpr(p->head, m);
 
     if (p->tail != NULL) {
-        result->tail = eval_pair(p->tail, m);
+        result->tail = eval_list(p->tail, m);
     } else {
         result->tail = NULL;
     }
@@ -202,43 +202,43 @@ struct pair *eval_pair(struct pair *p, struct map *m) {
 struct sexpr *eval_sexpr(struct sexpr *form, struct map *m) {
     if (form->type == SYMBOL) {
         return eval_symbol(form->symbol, m);
-    } else if (form->type == PAIR) {
-        if (quote_p(form->pair->head->symbol)) {
-            return interpret_quote(form->pair->tail, m);
-        } else if (list_p(form->pair->head->symbol)) {
-            return interpret_list(form->pair->tail, m);
-        } else if (head_p(form->pair->head->symbol)) {
-            return interpret_head(form->pair->tail, m);
-        } else if (tail_p(form->pair->head->symbol)) {
-            return interpret_tail(form->pair->tail, m);
-        } else if (eq_p(form->pair->head->symbol)) {
-            return interpret_eq(form->pair->tail, m);
-        } else if (defvar_p(form->pair->head->symbol)) {
-            return interpret_defvar(form->pair->tail, m);
-        } else if (lambda_p(form->pair->head->symbol)) {
-            return interpret_lambda(form->pair->tail, m);
-        } else if (create_map_p(form->pair->head->symbol)) {
-            return interpret_create_map(form->pair->tail, m);
-        } else if (set_p(form->pair->head->symbol)) {
-            return interpret_set(form->pair->tail, m);
-        } else if (get_p(form->pair->head->symbol)) {
-            return interpret_get(form->pair->tail, m);
-        } else if (read_p(form->pair->head->symbol)) {
-            return interpret_read(form->pair->tail, m);
-        } else if (eval_p(form->pair->head->symbol)) {
-            return interpret_eval(form->pair->tail, m);
-        } else if (loop_p(form->pair->head->symbol)) {
-            return interpret_loop(form->pair->tail, m);
-        } else if (print_p(form->pair->head->symbol)) {
-            return interpret_print(form->pair->tail, m);
-        } else if (form->pair->head->type == FUNCTION) {
-            return eval_function(form->pair->head->function, form->pair->tail, m);
+    } else if (form->type == LIST) {
+        if (quote_p(form->list->head->symbol)) {
+            return interpret_quote(form->list->tail, m);
+        } else if (list_p(form->list->head->symbol)) {
+            return interpret_list(form->list->tail, m);
+        } else if (head_p(form->list->head->symbol)) {
+            return interpret_head(form->list->tail, m);
+        } else if (tail_p(form->list->head->symbol)) {
+            return interpret_tail(form->list->tail, m);
+        } else if (eq_p(form->list->head->symbol)) {
+            return interpret_eq(form->list->tail, m);
+        } else if (defvar_p(form->list->head->symbol)) {
+            return interpret_defvar(form->list->tail, m);
+        } else if (lambda_p(form->list->head->symbol)) {
+            return interpret_lambda(form->list->tail, m);
+        } else if (create_map_p(form->list->head->symbol)) {
+            return interpret_create_map(form->list->tail, m);
+        } else if (set_p(form->list->head->symbol)) {
+            return interpret_set(form->list->tail, m);
+        } else if (get_p(form->list->head->symbol)) {
+            return interpret_get(form->list->tail, m);
+        } else if (read_p(form->list->head->symbol)) {
+            return interpret_read(form->list->tail, m);
+        } else if (eval_p(form->list->head->symbol)) {
+            return interpret_eval(form->list->tail, m);
+        } else if (loop_p(form->list->head->symbol)) {
+            return interpret_loop(form->list->tail, m);
+        } else if (print_p(form->list->head->symbol)) {
+            return interpret_print(form->list->tail, m);
+        } else if (form->list->head->type == FUNCTION) {
+            return eval_function(form->list->head->function, form->list->tail, m);
         } else {
             struct sexpr *result = malloc(sizeof(struct sexpr));
-            result->type = PAIR;
-            result->pair = form->pair;
+            result->type = LIST;
+            result->list = form->list;
 
-            result->pair->head = eval_sexpr(result->pair->head, m);
+            result->list->head = eval_sexpr(result->list->head, m);
 
             return eval_sexpr(result, m);
         }
