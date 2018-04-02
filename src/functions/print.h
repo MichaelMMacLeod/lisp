@@ -1,5 +1,5 @@
-#ifndef INCLUDE_PRINT_H
-#define INCLUDE_PRINT_H
+#ifndef INCLUDE_FUNCTIONS_PRINT_H
+#define INCLUDE_FUNCTIONS_PRINT_H
 
 void print_symbol(char *symbol) {
     printf("%s", symbol);
@@ -24,19 +24,24 @@ void print_list(struct list *p) {
 }
 
 void print_function(struct function *f) {
+    if (f->type == PRIMITIVE) {
+        printf(f->primitive);
+        return;
+    }
+
     printf("#<FUNCTION (LAMBDA ");
 
-    print_list(f->args);
+    print_list(f->lambda->args);
 
-    if (f->body != NULL) {
+    if (f->lambda->body != NULL) {
         printf(" ");
     }
 
-    print_sexpr(f->body);
+    print_sexpr(f->lambda->body);
 
     printf(") ");
 
-    printf("[%p]>", f);
+    printf("[%p]>", f->lambda);
 }
 
 void print_map(struct map *m) {

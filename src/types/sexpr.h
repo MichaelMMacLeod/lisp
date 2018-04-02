@@ -1,5 +1,13 @@
-#ifndef INCLUDE_SEXPR_H
-#define INCLUDE_SEXPR_H
+#ifndef INCLUDE_TYPES_SEXPR_H
+#define INCLUDE_TYPES_SEXPR_H
+
+#include "symbol.h"
+#include "list.h"
+#include "function.h"
+#include "item.h"
+#include "map.h"
+#include "string.h"
+#include "stream.h"
 
 struct sexpr {
     enum { SYMBOL, LIST, FUNCTION, ITEM, MAP, STRING } type;
@@ -11,26 +19,6 @@ struct sexpr {
         struct map *map;
         char *string;
     };
-};
-
-struct list {
-    struct sexpr *head;
-    struct list *tail;
-};
-
-struct function {
-    struct list *args;
-    struct sexpr *body;
-};
-
-struct map {
-    int size;
-    struct item *items;
-};
-
-struct item {
-    char *key;
-    struct sexpr *value;
 };
 
 #endif

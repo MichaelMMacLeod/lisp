@@ -1,4 +1,4 @@
-#include "src.h"
+#include "src/src.h"
 
 int main() {
     struct map *package = create_default_environment();

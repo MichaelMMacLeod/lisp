@@ -1,4 +1,0 @@
-#ifndef INCLUDE_TYPES_STRING_H
-#define INCLUDE_TYPES_STRING_H
-
-#endif
