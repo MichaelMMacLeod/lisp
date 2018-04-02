@@ -25,6 +25,7 @@ struct sexpr *eval_symbol(struct sexpr *s, struct map *package) {
     IF_PRIMITIVE_RETURN("HEAD", s);
     IF_PRIMITIVE_RETURN("TAIL", s);
     IF_PRIMITIVE_RETURN("LAMBDA", s);
+    IF_PRIMITIVE_RETURN("DEFVAR", s);
 
     struct item *i = get(s->symbol, package);
 

@@ -1,5 +1,5 @@
-#ifndef INCLUDE_FUNCTIONS_LAMBDA_H
-#define INCLUDE_FUNCTIONS_LAMBDA_H
+#ifndef INCLUDE_FRONTEND_LAMBDA_H
+#define INCLUDE_FRONTEND_LAMBDA_H
 
 struct sexpr *lambda(struct list *args, struct map *package) {
     struct lambda *l = malloc(sizeof(struct lambda));

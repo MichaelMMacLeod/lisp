@@ -1,5 +1,5 @@
-#ifndef INCLUDE_FUNCTIONS_TAIL_H
-#define INCLUDE_FUNCTIONS_TAIL_H
+#ifndef INCLUDE_FRONTEND_TAIL_H
+#define INCLUDE_FRONTEND_TAIL_H
 
 struct sexpr *tail(struct list *args, struct map *package) {
     struct sexpr *result = malloc(sizeof(struct sexpr));

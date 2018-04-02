@@ -6,5 +6,6 @@
 #include "list.h"
 #include "quote.h"
 #include "tail.h"
+#include "defvar.h"
 
 #endif
