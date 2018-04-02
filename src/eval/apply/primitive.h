@@ -20,6 +20,9 @@ struct sexpr *apply_primitive(char *p, struct list *args, struct map *package) {
     if (STR_EQ("DEFVAR", p))
         return defvar(args, package);
 
+    if (STR_EQ("EQ", p))
+        return eq(args, package);
+
     return NULL;
 }
 

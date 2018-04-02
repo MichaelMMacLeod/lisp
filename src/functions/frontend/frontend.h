@@ -7,5 +7,6 @@
 #include "quote.h"
 #include "tail.h"
 #include "defvar.h"
+#include "eq.h"
 
 #endif
