@@ -1,0 +1,16 @@
+#!/usr/bin/bash
+
+[ ! -d build/debug ] && mkdir -p build/debug
+[ ! -d build/release ] && mkdir -p build/release
+
+case "$1" in
+    release )
+        gcc -O2 main.c -o build/release/target
+        ;;
+    debug )
+        gcc -g -Wall main.c -o build/debug/target
+        ;;
+    * )
+        echo "usage: compile (release | debug)"
+        ;;
+esac
