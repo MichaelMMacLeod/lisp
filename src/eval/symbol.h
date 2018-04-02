@@ -2,8 +2,8 @@
 #define INCLUDE_EVAL_SYMBOL_H
 
 struct sexpr *eval_symbol(struct sexpr *s, struct map *package) {
-    if (STR_EQ("NIL", s->symbol))
-        return s;
+    //if (STR_EQ("NIL", s->symbol))
+    //    return s;
 
     struct item *i = get(s->symbol, package);
 

@@ -8,5 +8,7 @@
 #include "tail.h"
 #include "defvar.h"
 #include "eq.h"
+#include "nil.h"
+#include "t.h"
 
 #endif

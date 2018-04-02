@@ -23,6 +23,12 @@ struct sexpr *apply_primitive(char *p, struct list *args, struct map *package) {
     if (STR_EQ("EQ", p))
         return eq(args, package);
 
+    if (STR_EQ("NIL", p))
+        return nil(args, package);
+
+    if (STR_EQ("T", p))
+        return t(args, package);
+
     return NULL;
 }
 
