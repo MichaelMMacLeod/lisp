@@ -14,5 +14,7 @@
 #include "create_map.h"
 #include "get.h"
 #include "set.h"
+#include "key.h"
+#include "value.h"
 
 #endif
