@@ -4,9 +4,9 @@
 #include <stdio.h>
 
 struct stream {
-    enum { STREAM, STRING_STREAM } type;
+    enum { NORMAL_STREAM, STRING_STREAM } type;
     union {
-        FILE *stream;
+        FILE *normal_stream;
         char *string_stream;
     };
 };

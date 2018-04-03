@@ -10,7 +10,7 @@
 #include "stream.h"
 
 struct sexpr {
-    enum { SYMBOL, LIST, FUNCTION, ITEM, MAP, STRING } type;
+    enum { SYMBOL, LIST, FUNCTION, ITEM, MAP, STRING, STREAM } type;
     union {
         char *symbol;
         struct list *list;
@@ -18,6 +18,7 @@ struct sexpr {
         struct item *item;
         struct map *map;
         char *string;
+        struct stream *stream;
     };
 };
 

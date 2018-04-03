@@ -10,6 +10,7 @@ struct sexpr *eval_sexpr(struct sexpr *s, struct map *package);
 #include "item.h"
 #include "map.h"
 #include "string.h"
+#include "stream.h"
 
 struct sexpr *eval_sexpr(struct sexpr *s, struct map *package) {
     if (s->type == SYMBOL)
@@ -29,6 +30,9 @@ struct sexpr *eval_sexpr(struct sexpr *s, struct map *package) {
 
     if (s->type == STRING)
         return eval_string(s, package);
+
+    if (s->type == STREAM)
+        return eval_stream(s, package);
 
     return NULL;
 }

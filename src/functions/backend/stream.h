@@ -2,8 +2,8 @@
 #define INCLUDE_FUNCTIONS_STREAM_H
 
 char get_char(struct stream *s) {
-    if (s->type == STREAM) {
-        return fgetc(s->stream);
+    if (s->type == NORMAL_STREAM) {
+        return fgetc(s->normal_stream);
     } else if (s->type == STRING_STREAM) {
         char c = *s->string_stream;
 
@@ -16,10 +16,10 @@ char get_char(struct stream *s) {
 }
 
 char peek_char(struct stream *s) {
-    if (s->type == STREAM) {
-        char c = fgetc(s->stream);
+    if (s->type == NORMAL_STREAM) {
+        char c = fgetc(s->normal_stream);
 
-        ungetc(c, s->stream);
+        ungetc(c, s->normal_stream);
 
         return c;
     } else if (s->type == STRING_STREAM) {

@@ -7,8 +7,8 @@ int main() {
         printf("<%p> ", package);
 
         struct stream *in = malloc(sizeof(struct stream));
-        in->type = STREAM;
-        in->stream = stdin;
+        in->type = NORMAL_STREAM;
+        in->normal_stream = stdin;
 
         struct sexpr *read_step = sexpr_reader(get_char(in), in, package);
         struct sexpr *eval_step = eval_sexpr(read_step, package);

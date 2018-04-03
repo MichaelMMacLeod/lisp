@@ -47,6 +47,9 @@ struct sexpr *apply_primitive(char *p, struct list *args, struct map *package) {
     if (STR_EQ("VALUE", p))
         return value(args, package);
 
+    if (STR_EQ("CREATE-STREAM", p))
+        return create_stream(args, package);
+
     return NULL;
 }
 

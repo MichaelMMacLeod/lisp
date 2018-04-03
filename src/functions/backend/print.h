@@ -56,11 +56,23 @@ void print_item(struct item *i) {
 
     print_sexpr(i->value);
 
-    printf(">");
+    printf(" {%p}>", i);
 }
 
 void print_string(char *string) {
     printf("\"%s\"", string);
+}
+
+void print_stream(struct stream *s) {
+    printf("#<STREAM TYPE=");
+
+    if (s->type == NORMAL_STREAM) {
+        printf("NORMAL-STREAM");
+    } else if (s->type == STRING_STREAM) {
+        printf("STRING-STREAM");
+    }
+
+    printf(" {%p}>", s);
 }
 
 void print_sexpr(struct sexpr *s) {
@@ -80,6 +92,8 @@ void print_sexpr(struct sexpr *s) {
         print_item(s->item);
     } else if (s->type == STRING) {
         print_string(s->string);
+    } else if (s->type == STREAM) {
+        print_stream(s->stream);
     }
 }
 

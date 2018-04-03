@@ -16,5 +16,6 @@
 #include "set.h"
 #include "key.h"
 #include "value.h"
+#include "create_stream.h"
 
 #endif
