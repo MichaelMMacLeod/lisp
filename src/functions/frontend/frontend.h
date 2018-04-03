@@ -10,5 +10,6 @@
 #include "eq.h"
 #include "nil.h"
 #include "t.h"
+#include "print.h"
 
 #endif

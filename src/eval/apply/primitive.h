@@ -29,6 +29,9 @@ struct sexpr *apply_primitive(char *p, struct list *args, struct map *package) {
     if (STR_EQ("T", p))
         return t(args, package);
 
+    if (STR_EQ("PRINT", p))
+        return print(args, package);
+
     return NULL;
 }
 

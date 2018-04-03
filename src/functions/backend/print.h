@@ -83,10 +83,4 @@ void print_sexpr(struct sexpr *s) {
     }
 }
 
-void print_sexpr_toplevel(struct sexpr *s) {
-    printf("\n");
-    print_sexpr(s);
-    printf("\n");
-}
-
 #endif
