@@ -40,7 +40,7 @@ int exists(struct item *i, struct map *m) {
 //
 // return - the item, or a new one with a NULL value if it doesn't exist in the
 // map
-struct item *get(char *key, struct map *m) {
+struct item *get_item(char *key, struct map *m) {
     for (int k = 0; k < m->size; ++k) {
         if (strcmp(key, m->items[k].key) == 0) {
             return &m->items[k];
@@ -60,7 +60,7 @@ struct item *get(char *key, struct map *m) {
 //
 // return - the new item, or, if it was a duplicate, the original
 struct item *add_without_shadowing(struct item *i, struct map *m) {
-    struct item *possible_duplicate = get(i->key, m);
+    struct item *possible_duplicate = get_item(i->key, m);
 
     if (!exists(possible_duplicate, m)) {
         ++m->size;
@@ -78,7 +78,7 @@ struct item *add_without_shadowing(struct item *i, struct map *m) {
 //
 // return - the new item
 struct item *add(struct item *i, struct map *m) {
-    struct item *possible_duplicate = get(i->key, m);
+    struct item *possible_duplicate = get_item(i->key, m);
 
     if (!exists(possible_duplicate, m)) {
         ++m->size;

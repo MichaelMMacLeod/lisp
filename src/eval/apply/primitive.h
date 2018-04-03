@@ -35,6 +35,9 @@ struct sexpr *apply_primitive(char *p, struct list *args, struct map *package) {
     if (STR_EQ("CREATE-MAP", p))
         return create_map(args, package);
 
+    if (STR_EQ("GET", p))
+        return get(args, package);
+
     return NULL;
 }
 

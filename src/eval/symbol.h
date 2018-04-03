@@ -5,7 +5,7 @@ struct sexpr *eval_symbol(struct sexpr *s, struct map *package) {
     //if (STR_EQ("NIL", s->symbol))
     //    return s;
 
-    struct item *i = get(s->symbol, package);
+    struct item *i = get_item(s->symbol, package);
 
     if (i != NULL) {
         if (i->value != NULL) {

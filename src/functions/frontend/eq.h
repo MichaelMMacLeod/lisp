@@ -11,9 +11,9 @@ struct sexpr *eq(struct list *args, struct map *package) {
     char *right = eval_sexpr(args->tail->head, package)->symbol;
 
     if (left == right) {
-        result->function->primitive = get("T", package)->key;
+        result->function->primitive = get_item("T", package)->key;
     } else {
-        result->function->primitive = get("NIL", package)->key;
+        result->function->primitive = get_item("NIL", package)->key;
     }
 
     return result;

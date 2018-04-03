@@ -11,7 +11,7 @@ struct sexpr *single_quote_reader(char curr, struct stream *in, struct map *pack
 
     struct sexpr *quote_sexpr = malloc(sizeof(struct sexpr));
     quote_sexpr->type = SYMBOL;
-    quote_sexpr->symbol = get("QUOTE", package)->key;
+    quote_sexpr->symbol = get_item("QUOTE", package)->key;
 
     struct list *result_list = malloc(sizeof(struct list));
     result_list->head = quote_sexpr;
