@@ -38,6 +38,9 @@ struct sexpr *apply_primitive(char *p, struct list *args, struct map *package) {
     if (STR_EQ("GET", p))
         return get(args, package);
 
+    if (STR_EQ("SET", p))
+        return set(args, package);
+
     return NULL;
 }
 
