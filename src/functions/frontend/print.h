@@ -2,9 +2,11 @@
 #define INCLUDE_FRONTEND_PRINT_H
 
 struct sexpr *print(struct list *args, struct map *package) {
-    print_sexpr(args->head);
+    struct sexpr *s = eval_sexpr(args->head, package);
 
-    return args->head;
+    print_sexpr(s);
+
+    return s;
 }
 
 #endif
